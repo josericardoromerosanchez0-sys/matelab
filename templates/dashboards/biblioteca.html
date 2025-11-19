@@ -1,0 +1,574 @@
+{% extends 'layout/master.html' %}
+
+{% block title %}Biblioteca{% endblock %}
+
+{% block layout %}
+<!-- Layout wrapper: Start -->
+<div class="layout-wrapper layout-content-navbar">
+  <div class="layout-container">
+    <!-- Menu: Start -->
+    {% include 'layout/partials/menu/vertical/student_menu.html' %}
+    <!-- Menu: End -->
+
+    <!-- Layout page: Start -->
+    <div class="layout-page">
+      <!-- Navbar: Start -->
+      {% include 'layout/partials/navbar/navbar.html' %}
+      <!-- Navbar: End -->
+
+      <!-- Content wrapper: Start -->
+      <div class="content-wrapper">
+        <!-- Content: Start -->
+        <div class="container-xxl flex-grow-1 container-p-y">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Biblioteca</h2>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-primary" onclick="window.history.back()">
+                <i class="ti ti-arrow-back-up me-2"></i>Volver
+              </button>
+            </div>
+          </div>
+
+<!-- Modal de práctica -->
+<div class="modal fade" id="practicaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="practicaModalTitle">Práctica</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="practice-wrapper">
+          <h5 class="text-center mb-3">Resuelve el siguiente ejercicio:</h5>
+          <div class="practice-panel shadow-sm mb-3">
+            <div class="practice-banner" id="practicaProblemDesc">—</div>
+          </div>
+          <label class="form-label small text-muted mb-1">Tu respuesta:</label>
+          <div class="input-group input-group-lg practice-input mb-2">
+            <input type="text" class="form-control" id="practicaRespuesta" placeholder="Escribe tu respuesta" />
+            <button class="btn btn-success" id="practicaVerificar"><i class="ti ti-check me-1"></i> Verificar</button>
+          </div>
+          <div id="practicaFeedback" class="mb-2"></div>
+          <div class="text-center">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="practicaReiniciar">Reiniciar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+          <!-- Learning Options -->
+          <div class="row g-4">
+            <!-- Juegos Educativos -->
+            <div class="col-md-6">
+              <div class="card h-100">
+                <div class="card-header bg-label-success text-center p-3">
+                  <h4 class="mb-0">
+                    <i class="ti ti-device-gamepad-2 me-2"></i>
+                    Juegos Educativos
+                  </h4>
+                </div>
+                <div class="card-body">
+                  <p class="text-muted mb-4">Aprende jugando con nuestros juegos educativos.</p>
+                  
+                  {% for contenido in contenidos_por_tipo.Juego %}
+                  <div class="card mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ contenido.titulo }}</h5>
+                      <p class="card-text text-muted">{{ contenido.descripcion|truncatechars:100 }}</p>
+                     <a href="#"
+   class="btn btn-sm btn-success"
+   data-bs-toggle="modal"
+   data-bs-target="#gameModal"
+   onclick="abrirJuego('{{ contenido.titulo|escapejs }}', '{{ contenido.descripcion|escapejs }}', '{{ contenido.solucion|escapejs }}')">
+   Jugar Ahora
+</a>
+ </div>
+                  </div>
+                  {% empty %}
+                  <div class="text-center py-4">
+                    <i class="ti ti-info-circle fs-1 text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No hay juegos disponibles</p>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Practicas -->
+            <div class="col-md-6">
+              <div class="card h-100">
+                <div class="card-header bg-label-info text-center p-3">
+                  <h4 class="mb-0">
+                    <i class="ti ti-edit me-2"></i>
+                    Prácticas
+                  </h4>
+                </div>
+                <div class="card-body">
+                  <p class="text-muted mb-4">Mejora tus habilidades con ejercicios prácticos.</p>
+                  
+                  {% for contenido in contenidos_por_tipo.Practica %}
+                  <div class="card mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ contenido.titulo }}</h5>
+                      <p class="card-text text-muted">{{ contenido.descripcion|truncatechars:100 }}</p>
+                      <a href="#"
+                         class="btn btn-sm btn-info"
+                         data-bs-toggle="modal"
+                         data-bs-target="#practicaModal"
+                         onclick="abrirPractica('{{ contenido.titulo|escapejs }}', '{{ contenido.descripcion|escapejs }}', '{{ contenido.solucion|escapejs }}')">
+                        Practicar
+                      </a>
+                    </div>
+                  </div>
+                  {% empty %}
+                  <div class="text-center py-4">
+                    <i class="ti ti-info-circle fs-1 text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No hay prácticas disponibles</p>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- / Content -->
+      </div>
+      <!-- / Content wrapper: End -->
+    </div>
+    <!-- / Layout page: End -->
+  </div>
+</div>
+<!-- / Layout wrapper: End -->
+
+
+
+
+<!-- Modal del juego -->
+<div class="modal fade" id="gameModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="gameModalLabel">Juego</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="gameContent">
+        <p id="gameModalDesc" class="mb-3"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_css %}
+<style>
+  .option-card {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(105, 80, 80, 0.05);
+  }
+  
+  .option-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+  
+  .option-card[data-option="aprender"] .icon-wrapper {
+    background-color: rgba(105, 108, 255, 0.1);
+    color: #696cff;
+  }
+  
+  .option-card[data-option="jugar"] .icon-wrapper {
+    background-color: rgba(105, 208, 155, 0.1);
+    color: #28c76f;
+  }
+  
+  .option-card[data-option="practicar"] .icon-wrapper {
+    background-color: rgba(0, 207, 232, 0.1);
+    color: #00cfeb;
+  }
+  
+  .btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .btn {
+    margin-top: auto;
+    align-self: center;
+  }
+
+  /* Practice modal UI */
+  .practice-panel {
+    background: #f4f5fb;
+    border: 1px solid rgba(105,108,255,0.15);
+    border-radius: 10px;
+    padding: 0.75rem;
+  }
+  .practice-banner {
+    background: linear-gradient(135deg, rgba(105,108,255,0.1), rgba(155,81,224,0.1));
+    border: 1px dashed rgba(155,81,224,0.35);
+    color: #9b51e0;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.8rem;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .practice-input .form-control {
+    font-size: 1.05rem;
+  }
+  #practicaFeedback {
+    min-height: 1.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function cleanupModalBackdrops(){
+      document.querySelectorAll('.modal-backdrop').forEach(function(b){ b.remove(); });
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    ['gameModal','practicaModal'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('hidden.bs.modal', cleanupModalBackdrops);
+      }
+    });
+    // Add click handlers for each option
+    document.querySelectorAll('.option-card').forEach(card => {
+      card.addEventListener('click', function(e) {
+        if (!e.target.closest('button')) {
+          const option = this.getAttribute('data-option');
+          // Handle card click (not on the button)
+          console.log('Selected option:', option);
+          // You can add navigation or other actions here
+        }
+      });
+    });
+    
+    // Add button click handlers
+    document.querySelector('[data-option="aprender"] .btn').addEventListener('click', function() {
+      // Handle Aprender Habilidad click
+      console.log('Aprender Habilidad clicked');
+      // Add your navigation logic here
+    });
+    
+    document.querySelector('[data-option="jugar"] .btn').addEventListener('click', function() {
+      // Handle Jugar click
+      console.log('Jugar clicked');
+      // Add your navigation logic here
+    });
+    
+    document.querySelector('[data-option="practicar"] .btn').addEventListener('click', function() {
+      // Handle Practicar click
+      console.log('Practicar clicked');
+      // Add your navigation logic here
+    });
+  });
+
+
+function abrirJuego(titulo, descripcion, solucion) {
+    const url = `{% url 'biblioteca:juego_operaciones' %}?titulo=${encodeURIComponent(titulo)}&descripcion=${encodeURIComponent(descripcion)}&solucion=${encodeURIComponent(solucion)}`;
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("gameContent").innerHTML = html;
+            const modal = new bootstrap.Modal(document.getElementById("gameModal"));
+            
+            // Update the modal title and description
+            document.getElementById("gameModalLabel").textContent = titulo;
+            const descElement = document.getElementById("gameModalDesc");
+            if (descElement) {
+                descElement.textContent = descripcion;
+            }
+            
+            // Evitar duplicar backdrops si el modal ya fue abierto por data-bs-toggle
+            const gm = document.getElementById('gameModal');
+            if (gm && !gm.classList.contains('show')) {
+              modal.show();
+            }
+        });
+}
+
+let practicaRespuestaCorrecta = '';
+function abrirPractica(titulo, descripcion, solucion) {
+    practicaRespuestaCorrecta = (solucion || '').toString().trim();
+    const modalEl = document.getElementById('practicaModal');
+    const modal = new bootstrap.Modal(modalEl);
+    
+    const titleEl = document.getElementById('practicaModalTitle');
+    const descEl = document.getElementById('practicaProblemDesc');
+    const bannerEl = document.getElementById('practicaTitleBanner');
+    const inputEl = document.getElementById('practicaRespuesta');
+    const feedbackEl = document.getElementById('practicaFeedback');
+    const verificarBtn = document.getElementById('practicaVerificar');
+    const reiniciarBtn = document.getElementById('practicaReiniciar');
+
+    if (titleEl) titleEl.textContent = titulo || 'Práctica';
+    if (descEl) descEl.textContent = descripcion || '';
+    if (bannerEl) bannerEl.textContent = titulo || '—';
+
+    if (inputEl) {
+      inputEl.value = '';
+      inputEl.classList.remove('is-valid', 'is-invalid');
+    }
+    if (feedbackEl) {
+      feedbackEl.textContent = '';
+      feedbackEl.className = '';
+    }
+
+    // Handlers (overwrite to avoid duplicados)
+    if (verificarBtn) {
+      verificarBtn.onclick = function() {
+        if (!inputEl) return;
+        const valor = (inputEl.value || '').toString().trim();
+        if (!valor) {
+          feedbackEl.className = 'text-muted';
+          feedbackEl.textContent = 'Escribe una respuesta para verificar.';
+          return;
+        }
+        const correcto = compararRespuestas(valor, practicaRespuestaCorrecta);
+        if (correcto) {
+          inputEl.classList.remove('is-invalid');
+          inputEl.classList.add('is-valid');
+          feedbackEl.className = 'text-success fw-semibold';
+          feedbackEl.textContent = '✅ ¡Respuesta correcta!';
+        } else {
+          inputEl.classList.remove('is-valid');
+          inputEl.classList.add('is-invalid');
+          feedbackEl.className = 'text-danger fw-semibold';
+          feedbackEl.textContent = '❌ Respuesta incorrecta. Intenta nuevamente.';
+        }
+      };
+    }
+
+    if (reiniciarBtn) {
+      reiniciarBtn.onclick = function() {
+        if (inputEl) {
+          inputEl.value = '';
+          inputEl.classList.remove('is-valid', 'is-invalid');
+          inputEl.focus();
+        }
+        if (feedbackEl) {
+          feedbackEl.textContent = '';
+          feedbackEl.className = '';
+        }
+      };
+    }
+
+    if (inputEl) {
+      inputEl.onkeydown = function(e){
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (verificarBtn) verificarBtn.click();
+        }
+      };
+    }
+
+    // Evitar duplicar backdrops si el modal ya fue abierto por data-bs-toggle
+    if (modalEl && !modalEl.classList.contains('show')) {
+      modal.show();
+    }
+}
+
+function compararRespuestas(userVal, correctVal){
+  const u = userVal.replace(/\s+/g,'').toLowerCase();
+  const c = (correctVal || '').replace(/\s+/g,'').toLowerCase();
+  // Intentar comparar como número si aplica
+  const un = Number(userVal);
+  const cn = Number(correctVal);
+  if (!isNaN(un) && !isNaN(cn)) return un === cn;
+  return u === c;
+}
+
+    let timeLeft = 30;
+    let timer;
+    let gameActive = true;
+    let canAnswer = true;
+
+    // Función para iniciar el cronómetro
+
+ // Mover las variables al ámbito global
+    window.timeLeft = 30;
+    window.timer = null;
+    window.gameActive = true;
+
+    function startTimer() {
+        window.timeLeft = 30;
+        window.gameActive = true;
+        
+        const timerElement = document.getElementById('timer');
+        if (timerElement) {
+            timerElement.classList.remove('text-danger', 'fw-bold');
+            timerElement.style.animation = 'none';
+        }
+
+        updateTimerDisplay();
+        
+        // Limpiar cualquier temporizador existente
+        if (window.timer) {
+            clearInterval(window.timer);
+        }
+        
+        // Iniciar cuenta regresiva
+        window.timer = setInterval(function() {
+            if (window.timeLeft > 0 && window.gameActive) {
+                window.timeLeft--;
+                updateTimerDisplay();
+                
+                // Animación cuando el tiempo esté por terminar
+                if (window.timeLeft <= 5) {
+                    const timerElement = document.getElementById('timer');
+                    if (timerElement) {
+                        timerElement.classList.add('text-danger', 'fw-bold');
+                        timerElement.style.animation = 'pulse 1s infinite';
+                    }
+                }
+            } else if (window.gameActive) {
+                clearInterval(window.timer);
+                timeUp();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const timeDisplay = document.getElementById('time-display');
+        if (timeDisplay) {
+            timeDisplay.textContent = window.timeLeft;
+        }
+    }
+
+    function timeUp() {
+        if (!window.gameActive) return;
+        window.gameActive = false;
+
+        // Deshabilitar respuestas
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+
+        // Mostrar mensaje
+        const feedbackElement = document.getElementById('feedback');
+        if (feedbackElement) {
+            feedbackElement.textContent = "⏱️ ¡Tiempo agotado!";
+            feedbackElement.className = "text-warning h4";
+        }
+
+        // Mostrar botón de reinicio
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) {
+            restartBtn.style.display = 'inline-block';
+        }
+    }
+
+    function restartGame() {
+        // Limpiar feedback y botones
+        const feedbackElement = document.getElementById('feedback');
+        if (feedbackElement) {
+            feedbackElement.textContent = '';
+            feedbackElement.className = '';
+        }
+        
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('correct', 'incorrect');
+        });
+
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) {
+            restartBtn.style.display = 'none';
+        }
+        
+        startTimer();
+    }
+
+    // Iniciar el temporizador cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startTimer);
+    } else {
+        startTimer();
+    }
+
+
+    //--------------
+ 
+ 
+
+    // Función para verificar la respuesta seleccionada
+    function checkAnswer(selectedIndex, correctIndex) {
+        if (!canAnswer) return;
+        
+        canAnswer = false;
+        clearInterval(window.timer);
+        
+        const buttons = document.querySelectorAll('.option-btn');
+        const feedbackElement = document.getElementById('feedback');
+        
+        if (!feedbackElement) {
+            console.error("No se encontró el elemento de retroalimentación");
+            return;
+        }
+
+        // Deshabilitar todos los botones
+        buttons.forEach(btn => {
+            if (btn) btn.disabled = true;
+        });
+        
+        // Resaltar respuestas seleccionada y correcta
+        if (selectedIndex === correctIndex) {
+            if (buttons[selectedIndex]) buttons[selectedIndex].classList.add('correct');
+            feedbackElement.textContent = "✅ ¡Respuesta correcta! ¡Buen trabajo!";
+            feedbackElement.className = "text-success h4";
+        } else {
+            if (buttons[selectedIndex]) buttons[selectedIndex].classList.add('incorrect');
+            if (buttons[correctIndex]) {
+                buttons[correctIndex].classList.add('correct');
+                feedbackElement.textContent = `❌ Incorrecto. La respuesta correcta es: ${buttons[correctIndex].textContent}`;
+            } else {
+                feedbackElement.textContent = "❌ Respuesta incorrecta";
+            }
+            feedbackElement.className = "text-danger h4";
+        }
+        
+        // Mostrar el botón de reinicio
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) {
+            restartBtn.style.display = 'inline-block';
+        }
+    }
+</script>
+{% endblock %} 

@@ -47,7 +47,7 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # Current DJANGO_ENVIRONMENT
-ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", default="local")
+ENVIRONMENT = os.environ.get("ENVIRONMENT", default="local")
 
 
 # Application definition
@@ -185,16 +185,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_DIRS = ('static',)
 
 if not DEBUG:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "src" / "assets",
-    BASE_DIR / "src" / "assets" / "static",
-    BASE_DIR / "static",
-]
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 
 # Default URL on which Django application runs for specific environment
 BASE_URL = os.environ.get("BASE_URL", default="http://127.0.0.1:8000")

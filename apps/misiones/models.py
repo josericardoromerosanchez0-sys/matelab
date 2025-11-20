@@ -5,6 +5,12 @@ from apps.authentication.models import Usuarios
 
 # Use the custom user model
 User = get_user_model()
+TIPO_OPERACION_CHOICES = [
+    ('suma', 'Suma'),
+    ('resta', 'Resta'),
+    ('multiplicacion', 'Multiplicación'),
+    ('division', 'División'),
+]
 
 class Habilidad(models.Model):
     habilidad_id = models.AutoField(primary_key=True)
@@ -26,6 +32,7 @@ class Mision(models.Model):
     instrucciones_polya = models.TextField(null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     activa = models.BooleanField(default=True)
+    tipo_operacion = models.CharField(max_length=20, choices=TIPO_OPERACION_CHOICES)
 
     class Meta:
         db_table = 'Mision'

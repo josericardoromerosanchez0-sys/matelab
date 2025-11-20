@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from web_project import TemplateLayout
-from .models import Biblioteca
+from .models import Biblioteca, Biblioteca_Contenido
 import random
 
 class GestionBibliotecaView(TemplateView):
@@ -73,12 +73,25 @@ def crear_contenido(request):
                 activo=request.POST.get('activo', '1') == '1',
                 usuario=request.user
             )
+            contenido_detalle_id = None
+            if request.POST.get('tipo') == 'Contenido':
+                teoria = request.POST.get('teoria', '')
+                pasos_trucos = request.POST.get('pasos_trucos', '')
+                ejemplos = request.POST.get('ejemplos', '')
+                detalle = Biblioteca_Contenido.objects.create(
+                    biblioteca=contenido,
+                    teoria=teoria,
+                    pasos_trucos=pasos_trucos,
+                    ejemplos=ejemplos
+                )
+                contenido_detalle_id = detalle.biblioteca_contenido_id
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
                     'message': 'Contenido creado exitosamente',
-                    'id': contenido.id
+                    'id': contenido.id,
+                    'biblioteca_contenido_id': contenido_detalle_id
                 })
             
             messages.success(request, 'Contenido creado exitosamente')
@@ -169,8 +182,6 @@ def juego_operaciones(request):
  
     solucion = int(solucion)
     
-    # Generate a single question based on the description
-    # You can customize this based on your needs
     if "suma" in descripcion.lower():
         a = random.randint(1, 50)
         b = random.randint(1, 50)
@@ -191,25 +202,21 @@ def juego_operaciones(request):
         respuesta_correcta = solucion
         a = b * respuesta_correcta
         pregunta = descripcion
-    else:
-        # Default to addition if no operation is specified
+    else: 
         a = random.randint(1, 50)
         b = random.randint(1, 50)
         pregunta = descripcion
         respuesta_correcta = solucion
     
-    # Generate some incorrect answers
     opciones = [respuesta_correcta]
     while len(opciones) < 4:
         opcion = random.randint(max(1, respuesta_correcta - 10), respuesta_correcta + 10)
         if opcion not in opciones:
             opciones.append(opcion)
     
-    # Shuffle the options
     random.shuffle(opciones)
     indice_correcto = opciones.index(respuesta_correcta)
     
-    # Prepare the question data
     pregunta_data = {
         'pregunta': pregunta,
         'opciones': opciones,

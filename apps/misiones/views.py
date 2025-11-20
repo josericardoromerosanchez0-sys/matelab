@@ -77,15 +77,26 @@ def lista_misiones(request):
     # Obtener todas las misiones activas
     logger.info("Obteniendo misiones activas")
     try:
-        misiones = Mision.objects.filter(activa=True).select_related('habilidad')
-        logger.info(f"Se encontraron {misiones.count()} misiones activas")
-        
+        misiones_qs = Mision.objects.filter(activa=True).select_related('habilidad')
+        logger.info(f"Se encontraron {misiones_qs.count()} misiones activas")
+
+        # Reordenar misiones por tipo_operacion, máximo 10 por tipo en orden definido
+        tipos_en_orden = ['suma', 'resta', 'multiplicacion', 'division']
+        misiones_ordenadas = []
+        for tipo in tipos_en_orden:
+            for m in misiones_qs.filter(tipo_operacion=tipo).order_by('fecha_creacion')[:10]:
+                misiones_ordenadas.append(m)
+
+        # Agregar cualquier misión de otros tipos (o sobrantes) al final, sin duplicar
+        ids_ya_incluidos = {m.mision_id for m in misiones_ordenadas}
+        for m in misiones_qs.exclude(mision_id__in=ids_ya_incluidos).order_by('fecha_creacion'):
+            misiones_ordenadas.append(m)
+
         # Crear una lista para almacenar las misiones con su estado
         misiones_con_estado = []
-        
-        for mision in misiones:
+
+        for mision in misiones_ordenadas:
             logger.info(f"Procesando misión ID: {mision.mision_id} - {mision.titulo}")
-            
             # Obtener el último intento del usuario para esta misión
             try:
                 intento = IntentoMision.objects.filter(

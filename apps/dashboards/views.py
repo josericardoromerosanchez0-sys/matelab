@@ -204,7 +204,7 @@ class OpcionesAprendizajeView(TemplateView):
         
         # Group by type
         contenidos_por_tipo = {
-            'Habilidad': contenidos.filter(tipo='Habilidad'),
+            'Contenido': contenidos.filter(tipo='Contenido'),
             'Juego': contenidos.filter(tipo='Juego'),
             'Practica': contenidos.filter(tipo='Practica')
         }

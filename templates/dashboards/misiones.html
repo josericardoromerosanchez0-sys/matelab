@@ -206,47 +206,38 @@
 
 {% block page_js %}
 <script>
-  // Inicialización del modal con limpieza adecuada
   const modalElement = document.getElementById('misionDetalleModal');
   let modal = null;
 
-  // Función para limpiar correctamente el modal
   function cleanupModal() {
-    // Eliminar cualquier fondo de modal existente
     const backdrops = document.querySelectorAll('.modal-backdrop');
     backdrops.forEach(backdrop => backdrop.remove());
     
-    // Restablecer estilos del body
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
     document.body.classList.remove('modal-open');
   }
 
-  // Cargar Pólya de un estudiante y rellenar la tarjeta de la misión (Vista Profesor)
   function loadPolyaEstudiante(misionId, usuarioId, solucionTexto) {
     try {
       const card = document.querySelector(`.mision-card[data-mision-id="${misionId}"]`);
       if (!card) return;
 
-      // Mostrar solución del estudiante en el Paso 4
       const solBox = document.getElementById(`polya-solucion-box-${misionId}`);
       const solText = document.getElementById(`polya-solucion-text-${misionId}`);
       if (solText) solText.textContent = solucionTexto || '';
       if (solBox) solBox.style.display = solucionTexto ? 'block' : 'none';
 
-      // Mostrar contenedores de estado y Polya para Profesor
       const statusContainer = document.getElementById(`status-container-${misionId}`);
       const polyaContainer = document.getElementById(`polya-container-${misionId}`);
       if (statusContainer) statusContainer.style.display = '';
       if (polyaContainer) polyaContainer.style.display = '';
 
-      // Expandir Paso 4 para revisión
       const collapseEl = document.getElementById(`polyaStep4-${misionId}`);
       if (collapseEl && !collapseEl.classList.contains('show')) {
         try { new bootstrap.Collapse(collapseEl, { toggle: true }); } catch(e) {}
       }
 
-      // Helpers para localizar campos por nombre
       const byName = (base) => card.querySelector(`[name="${base}_${misionId}"]`);
       const q = byName('polya_que_se_pide');
       const d = byName('polya_datos');
@@ -277,7 +268,6 @@
           if (tac3) tac3.checked = !!data.tactica_ecuaciones;
           if (tac4) tac4.checked = !!data.tactica_formula;
 
-          // Paso 4 (solo vista profesor): poblar campos de lectura
           const revText = card.querySelector(`#polya-revision-text-${misionId}`);
           const compText = card.querySelector(`#polya-comp-text-${misionId}`);
           const conclText = card.querySelector(`#polya-concl-text-${misionId}`);
@@ -287,7 +277,6 @@
           if (conclText) conclText.textContent = data.conclusion_final || '';
           if (confBadge) confBadge.textContent = (data.confianza !== null && data.confianza !== undefined && data.confianza !== '') ? `${data.confianza}` : '—';
 
-          // Actualizar badge de estado y barra de progreso según intento
           if (j.intento) {
             const estado = j.intento.estado || 'pendiente';
             const badge = document.getElementById(`status-badge-${misionId}`);
@@ -298,7 +287,6 @@
             if (estado === 'completado') { txt = 'Completada'; cls = 'bg-label-success'; pct = 100; }
             else if (estado === 'en_progreso') { txt = 'En progreso'; cls = 'bg-label-info'; pct = 60; }
             else if (estado === 'rechazado') { txt = 'Incorrecto'; cls = 'bg-label-danger'; pct = 25; }
-            else if (estado === 'en_revision') { txt = 'En revisión'; cls = 'bg-label-warning'; pct = 40; }
             if (badge) { badge.textContent = txt; badge.className = `badge ${cls} me-2`; }
             if (prog) { prog.style.width = `${pct}%`; prog.setAttribute('aria-valuenow', pct); }
           }
@@ -307,7 +295,6 @@
     } catch (e) {}
   }
 
-  // Inicializar el modal cuando el documento esté listo
   document.addEventListener('DOMContentLoaded', function() {
     if (modalElement) {
       modal = new bootstrap.Modal(modalElement, {
@@ -316,12 +303,10 @@
         focus: true
       });
 
-      // Limpiar al ocultar el modal
       modalElement.addEventListener('hidden.bs.modal', function() {
         cleanupModal();
       });
 
-      // Manejar la visualización del modal
       modalElement.addEventListener('show.bs.modal', function(event) {
         const button = event.relatedTarget;
         const misionId = button.getAttribute('data-mision-id');
@@ -331,37 +316,29 @@
           modalElement.dataset.misionId = misionId;
         }
         
-        // Ocultar la vista de estudiante por defecto
         const vistaEstudiante = document.getElementById('vistaEstudiante');
         const vistaProfesor = document.getElementById('vistaProfesor');
         
-        // Determinar si es profesor o estudiante
         const esProfesor = vistaProfesor !== null;
         
         if (esProfesor) {
-          // Configuración para la vista de profesor
           const listaSoluciones = document.getElementById('listaSoluciones');
           const detalleSolucionContainer = document.getElementById('detalleSolucionContainer');
           
-          // Limpiar contenido anterior
           if (listaSoluciones) listaSoluciones.innerHTML = '';
           if (detalleSolucionContainer) detalleSolucionContainer.style.display = 'none';
           
-          // Cargar los intentos de los estudiantes
           if (misionId) {
             cargarIntentosMision(misionId);
           }
           
-          // Mostrar la vista de profesor
           if (vistaProfesor) vistaProfesor.style.display = 'block';
           if (vistaEstudiante) vistaEstudiante.style.display = 'none';
         } else {
-          // Configuración para la vista de estudiante
           if (misionCard) {
             const misionDescripcion = misionCard.querySelector('p')?.textContent || '';
             const misionEstado = misionCard.querySelector('.badge')?.textContent.trim() || '';
   
-            // Actualizar el contenido del modal
             document.getElementById('misionTitulo').textContent = misionTitulo;
             document.getElementById('misionDescripcion').textContent = misionDescripcion;
             
@@ -372,14 +349,11 @@
                                                 misionEstado === 'En progreso' ? 'bg-label-info' : 'bg-label-warning');
             }
 
-          
           }
           
-          // Mostrar la vista de estudiante
           if (vistaEstudiante) vistaEstudiante.style.display = 'block';
           if (vistaProfesor) vistaProfesor.style.display = 'none';
           
-          // Configurar el botón de confirmar respuesta
           const respuestaInput = document.getElementById('respuestaMision');
           const respuestaContainer = document.getElementById('respuestaContainer');
           const btnConfirmar = document.getElementById('btnConfirmarRespuesta');
@@ -391,13 +365,11 @@
       });
     }
 
-    // Configurar el manejador de clic para el botón de confirmar respuesta (Estudiante)
     const btnConfirmar = document.getElementById('btnConfirmarRespuesta');
     if (btnConfirmar) {
       btnConfirmar.addEventListener('click', manejarConfirmarRespuesta);
     }
     
-    // Configurar el manejador de clic para el botón de cierre del detalle (Profesor)
     const cerrarDetalle = document.getElementById('cerrarDetalle');
     if (cerrarDetalle) {
       cerrarDetalle.addEventListener('click', function() {
@@ -409,7 +381,6 @@
     }
   });
 
-  // Función para manejar la confirmación de respuesta del estudiante
   async function manejarConfirmarRespuesta() {
     const btnConfirmar = this;
     const respuestaInput = document.getElementById('respuestaMision');
@@ -447,7 +418,7 @@
         body: JSON.stringify({
           mision_id: misionId,
           solucion: respuesta,
-          estado: 'en_revision'  // Cambiado a 'en_revision' para mayor claridad
+          estado: 'en_revision'
         })
       });
 
@@ -463,14 +434,12 @@
         document.querySelector('#toastSuccess .toast-body').textContent = '¡Respuesta enviada correctamente! El profesor revisará tu respuesta pronto.';
         toast.show();
 
-        // Actualizar el estado en la interfaz
         const estadoBadge = document.getElementById('misionEstado');
         if (estadoBadge) {
           estadoBadge.textContent = 'En revisión';
           estadoBadge.className = 'badge bg-label-warning';
         }
 
-        // Actualizar el estado en la tarjeta de la misión
         const misionCard = document.querySelector(`.mision-card[data-mision-id="${misionId}"]`);
         if (misionCard) {
           const estadoCard = misionCard.querySelector('.badge');
@@ -490,34 +459,26 @@
             `;
           }
         }
-
-        // Ocultar el área de respuesta
         const respuestaContainer = document.getElementById('respuestaContainer');
         if (respuestaContainer) {
           respuestaContainer.style.display = 'none';
         }
         btnConfirmar.style.display = 'none';
         
-        // Cerrar el modal después de un breve retraso
         setTimeout(() => {
           if (modal) modal.hide();
           
-          // Mostrar la siguiente misión si existe
           const misionActual = document.querySelector(`.mision-card[data-mision-id="${misionId}"]`);
           if (misionActual) {
             const siguienteElemento = misionActual.nextElementSibling;
             
-            // Si el siguiente elemento es el mensaje de misión bloqueada
             if (siguienteElemento && siguienteElemento.id === 'siguiente-mision') {
               const siguienteMision = siguienteElemento.nextElementSibling;
               
-              // Si el siguiente elemento es una tarjeta de misión
               if (siguienteMision && siguienteMision.classList.contains('mision-card')) {
-                // Mostrar la siguiente misión
                 siguienteMision.style.display = 'block';
                 siguienteElemento.style.display = 'none';
                 
-                // Desplazarse suavemente a la siguiente misión
                 setTimeout(() => {
                   siguienteMision.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 300);
@@ -539,7 +500,6 @@
     }
   }
 
-  // Función para cargar los intentos de una misión (Vista Profesor)
   function cargarIntentosMision(misionId) {
     const listaSoluciones = document.getElementById('listaSoluciones');
     const detalleSolucionContainer = document.getElementById('detalleSolucionContainer');
@@ -548,7 +508,6 @@
     
     if (!misionId || !listaSoluciones) return;
 
-    // Mostrar mensaje de carga
     listaSoluciones.innerHTML = '<tr><td colspan="5" class="text-center">Cargando soluciones...</td></tr>';
     
     if (detalleSolucionContainer) {
@@ -563,7 +522,6 @@
         return response.json();
       })
       .then(intentos => {
-        // Limpiar lista
         listaSoluciones.innerHTML = '';
 
         if (intentos.length === 0) {
@@ -571,11 +529,9 @@
           return;
         }
 
-        // Agregar cada intento a la tabla
         intentos.forEach(intento => {
           const row = document.createElement('tr');
           
-          // Formatear la fecha
           const fechaIntento = new Date(intento.fecha_intento);
           const fechaFormateada = fechaIntento.toLocaleDateString('es-ES', {
             day: '2-digit',
@@ -585,7 +541,6 @@
             minute: '2-digit'
           });
           
-          // Determinar la clase del badge según el estado
           let estadoClase = 'bg-label-warning';
           let estadoTexto = 'Pendiente';
           
@@ -621,7 +576,6 @@
           listaSoluciones.appendChild(row);
         });
 
-        // Agregar manejadores de eventos a los botones de revisar
         document.querySelectorAll('.ver-detalle').forEach(btn => {
           btn.addEventListener('click', function() {
             const intentoId = this.getAttribute('data-intento-id');
@@ -631,7 +585,6 @@
             const estado = this.getAttribute('data-estado');
             const fecha = this.getAttribute('data-fecha');
             
-            // Actualizar el detalle de la solución
             const detalleSolucionContainer = document.getElementById('detalleSolucionContainer');
             const nombreEstudiante = document.getElementById('nombreEstudiante');
             const solucionDetalle = document.getElementById('solucionDetalle');
@@ -642,7 +595,6 @@
               nombreEstudiante.textContent = estudiante;
               solucionDetalle.textContent = solucion;
               
-              // Actualizar el estado
               estadoSolucion.textContent = estado === 'completado' ? 'Completado' : 
                                           estado === 'rechazado' ? 'Rechazado' : 'Pendiente';
               
@@ -653,19 +605,16 @@
               
               fechaSolucion.textContent = fecha;
               
-              // Configurar los botones de acción
               const btnAprobar = document.getElementById('btnAprobar');
               const btnRechazar = document.getElementById('btnRechazar');
               
               if (btnAprobar && btnRechazar) {
-                // Eliminar manejadores anteriores para evitar duplicados
                 const newBtnAprobar = btnAprobar.cloneNode(true);
                 const newBtnRechazar = btnRechazar.cloneNode(true);
                 
                 btnAprobar.parentNode.replaceChild(newBtnAprobar, btnAprobar);
                 btnRechazar.parentNode.replaceChild(newBtnRechazar, btnRechazar);
                 
-                // Configurar nuevos manejadores
                 newBtnAprobar.onclick = () => actualizarEstadoIntento(
                   intentoId, 
                   'completado', 
@@ -681,15 +630,12 @@
                 );
               }
               
-              // Mostrar el contenedor de detalle
               if (detalleSolucionContainer) {
                 detalleSolucionContainer.style.display = 'block';
                 
-                // Desplazarse al detalle si es necesario
                 detalleSolucionContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
               }
-
-              // Cargar datos de Pólya del estudiante en la tarjeta de la misión y mostrar su solución en Paso 4
+              
               const misionIdModal = modalElement?.dataset?.misionId;
               if (misionIdModal && usuarioId) {
                 loadPolyaEstudiante(misionIdModal, usuarioId, solucion);
@@ -710,18 +656,15 @@
       });
   }
 
-  // Función para actualizar el estado de un intento (Vista Profesor)
   async function actualizarEstadoIntento(intentoId, nuevoEstado, estadoBadgeElement, filaTabla) {
     if (!intentoId) return;
     
-    // Mostrar indicador de carga
     const estadoAnterior = estadoBadgeElement.textContent;
     const estadoAnteriorClase = estadoBadgeElement.className;
     
     estadoBadgeElement.textContent = 'Guardando...';
     estadoBadgeElement.className = 'badge bg-label-info';
     
-    // También actualizar en la fila de la tabla si se proporciona
     let estadoCelda = null;
     if (filaTabla) {
       estadoCelda = filaTabla.querySelector('td:nth-child(3) .badge');
@@ -749,26 +692,22 @@
       const data = await response.json();
       
       if (data.status === 'success') {
-        // Actualizar la interfaz con el nuevo estado
         const nuevoEstadoTexto = nuevoEstado === 'completado' ? 'Completado' : 'Rechazado';
         const nuevaClase = nuevoEstado === 'completado' ? 'bg-label-success' : 'bg-label-danger';
         
         estadoBadgeElement.textContent = nuevoEstadoTexto;
         estadoBadgeElement.className = `badge ${nuevaClase}`;
         
-        // Actualizar también en la tabla
         if (estadoCelda) {
           estadoCelda.textContent = nuevoEstadoTexto;
           estadoCelda.className = `badge ${nuevaClase}`;
         }
         
-        // Mostrar notificación de éxito
         const toast = new bootstrap.Toast(document.getElementById('toastSuccess'));
         document.querySelector('#toastSuccess .toast-body').textContent = 
           `Estado actualizado correctamente a: ${nuevoEstadoTexto}`;
         toast.show();
         
-        // Actualizar los datos del botón para futuras actualizaciones
         if (filaTabla) {
           const btnVerDetalle = filaTabla.querySelector('.ver-detalle');
           if (btnVerDetalle) {
@@ -781,7 +720,6 @@
     } catch (error) {
       console.error('Error al actualizar el estado:', error);
       
-      // Revertir los cambios en la interfaz
       estadoBadgeElement.textContent = estadoAnterior;
       estadoBadgeElement.className = estadoAnteriorClase;
       
@@ -790,7 +728,6 @@
         estadoCelda.className = estadoAnteriorClase;
       }
       
-      // Mostrar notificación de error
       const toast = new bootstrap.Toast(document.getElementById('toastError'));
       document.querySelector('#toastError .toast-body').textContent = 
         `Error al actualizar el estado: ${error.message || 'Inténtalo de nuevo'}`;
@@ -798,7 +735,6 @@
     }
   }
 
-  // Función auxiliar para obtener el token CSRF
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -814,7 +750,6 @@
     return cookieValue;
   }
 
-  // Limpiar al salir de la página
   window.addEventListener('beforeunload', cleanupModal);
 </script> 
 {% endblock %}

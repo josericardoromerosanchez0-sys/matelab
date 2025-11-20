@@ -40,6 +40,7 @@
               <option value="">Todos los tipos</option>
               <option value="Practica">Practica</option>
               <option value="Juego">Juego</option>
+              <option value="Contenido">Contenido</option>
             </select>
           </div>
           <div class="col-md-2">
@@ -151,10 +152,11 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Tipo</label>
-                  <select name="tipo" class="form-select" required>
+                  <select name="tipo" class="form-select" required id="nuevo_tipo">
                     <option value="">Seleccionar tipo</option>
                     <option value="Practica">Práctica</option>
                     <option value="Juego">Juego</option> 
+                    <option value="Contenido">Contenido</option>
                   </select>
                 </div>
                 <div class="col-md-6">
@@ -167,6 +169,22 @@
                 <div class="col-12">
                   <label class="form-label">Descripción</label>
                   <textarea name="descripcion" class="form-control" rows="4" placeholder="Descripción detallada del contenido" required></textarea>
+                </div>
+                <div id="extraContenidoFields" class="col-12 d-none">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label">Teoría</label>
+                      <textarea name="teoria" class="form-control" rows="5" placeholder="Explicación teórica del tema"></textarea>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Pasos o trucos</label>
+                      <textarea name="pasos_trucos" class="form-control" rows="4" placeholder="Ingrese uno por línea o separados por ; o |"></textarea>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Ejemplo</label>
+                      <textarea name="ejemplos" class="form-control" rows="4" placeholder="Puede incluir HTML básico si lo requiere"></textarea>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -208,6 +226,7 @@
                 <select class="form-select" id="edit_tipo" name="tipo" required>
                   <option value="Practica">Practica</option>
                   <option value="Juego">Juego</option>
+                  <option value="Contenido">Contenido</option>
                 </select>
               </div>
             </div>
@@ -269,29 +288,59 @@
 <script>
    // Inicializar DataTable con configuración personalizada
   $(document).ready(function() {
-    const table = $('#usersTable').DataTable({
-      responsive: true,
-      ordering: true,
-      order: [[0, 'desc']],
-      dom: '<"d-flex justify-content-between align-items-center mb-3"f<"ms-2"l>>rt<"d-flex justify-content-between align-items-center"ip>',
-      language: {
-        search: "",
-        searchPlaceholder: "Buscar...",
-        lengthMenu: "Mostrar _MENU_ registros",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ usuarios",
-        paginate: {
-          previous: "<i class='icon-base ri-arrow-left-s-line'></i>",
-          next: "<i class='icon-base ri-arrow-right-s-line'></i>"
+    if ($.fn.DataTable) {
+      $('#usersTable').DataTable({
+        responsive: true,
+        ordering: true,
+        order: [[0, 'desc']],
+        dom: '<"d-flex justify-content-between align-items-center mb-3"f<"ms-2"l>>rt<"d-flex justify-content-between align-items-center"ip>',
+        language: {
+          search: "",
+          searchPlaceholder: "Buscar...",
+          lengthMenu: "Mostrar _MENU_ registros",
+          info: "Mostrando _START_ a _END_ de _TOTAL_ usuarios",
+          paginate: {
+            previous: "<i class='icon-base ri-arrow-left-s-line'></i>",
+            next: "<i class='icon-base ri-arrow-right-s-line'></i>"
+          }
         }
-      }
-    });
+      });
+    } else {
+      console.warn('DataTables no está cargado, se omite la inicialización.');
+    }
 
     // Inicializar Select2
-    $('.select2').select2({
-      placeholder: 'Seleccionar',
-      width: '100%',
-      theme: 'bootstrap-5'
+    if ($.fn.select2) {
+      $('.select2').select2({
+        placeholder: 'Seleccionar',
+        width: '100%',
+        theme: 'bootstrap-5'
+      });
+    } else {
+      console.warn('Select2 no está cargado, se omite la inicialización.');
+    }
+
+    function toggleNuevoExtraFields() {
+      const tipo = $('#nuevo_tipo').val();
+      const $extra = $('#extraContenidoFields');
+      if (tipo === 'Contenido') {
+        $extra.removeClass('d-none');
+      } else {
+        $extra.addClass('d-none');
+        // Limpiar campos cuando no aplica
+        $extra.find('textarea[name="teoria"]').val('');
+        $extra.find('textarea[name="pasos_trucos"]').val('');
+        $extra.find('textarea[name="ejemplos"]').val('');
+      }
+    }
+
+    // Inicializar al abrir el modal y al cambiar el tipo
+    $('#nuevoContenido').on('show.bs.modal shown.bs.modal', function(){
+      toggleNuevoExtraFields();
     });
+    $(document).on('change', '#nuevo_tipo', toggleNuevoExtraFields);
+    // Llamado inicial por si el modal ya está abierto o el valor viene seteado
+    toggleNuevoExtraFields();
   });
  
   

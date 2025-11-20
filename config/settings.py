@@ -191,7 +191,7 @@ if not DEBUG:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STATICFILES_DIRS = [
-    BASE_DIR / "src" / "assets",
+    BASE_DIR / "src" / "assets"/ "static",
 ]
 
 # Default URL on which Django application runs for specific environment

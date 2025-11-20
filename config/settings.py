@@ -38,11 +38,13 @@ if not SECRET_KEY:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = 'RENDER' not in os.environ
 
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+# ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # Current DJANGO_ENVIRONMENT
 ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", default="local")
@@ -131,19 +133,21 @@ WSGI_APPLICATION = "config.wsgi.application"
 # config/settings.py
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'matematicasdb',
-        'HOST': 'localhost\\SQLEXPRESS',
-        'USER': '',  # Leave empty for Windows Authentication
-        'PASSWORD': '',  # Leave empty for Windows Authentication
+        'ENGINE': os.getenv('DB_ENGINE', 'mssql'),
+        'NAME': os.getenv('DB_NAME', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'USER': os.getenv('DB_USER', ''),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
         'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'Trusted_Connection=yes;Encrypt=yes;TrustServerCertificate=yes'
+            'driver': os.getenv('DB_DRIVER', 'ODBC Driver 17 for SQL Server'),
+            'extra_params': (
+                f"Trusted_Connection={os.getenv('DB_TRUSTED', 'no')};"
+                "Encrypt=yes;"
+                "TrustServerCertificate=yes"
+            )
         },
     }
 }
-
-
 
 
 # Password validation
@@ -181,8 +185,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STATICFILES_DIRS = [
     BASE_DIR / "src" / "assets",

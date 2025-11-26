@@ -175,57 +175,55 @@
                 </div>
                 <div class="card-body">
                   <p class="text-muted mb-4 text-center">Explora materiales, guías y recursos detallados.</p>
-                        <div class="card mb-3">
+                  <div class="card mb-3">
                     <div class="card-body">
                       <div class="d-flex align-items-center justify-content-between gap-3">
                         <div class="d-flex align-items-center gap-3">
                           <div class="avatar-sm rounded-circle bg-light d-flex align-items-center justify-content-center">
                             <i class="ri-book-line fs-5 text-secondary"></i>
-                          </div>
-                          <div class="text-truncate">
-                            <div class="fw-semibold text-truncate">Cómo sumar números de 2 cifras</div>
-                            <div class="text-muted small text-truncate">La suma combina cantidades. Practicaremos suma por columnas con llevadas.</div>
-                          </div>
+                          </div> 
                         </div>
-                        <a href="#"
-                           class="btn btn-sm btn-primary"
-                           data-bs-toggle="modal"
-                           data-bs-target="#contentModal"
-
-                    data-titulo="Cómo sumar números de 2 cifras"
-                    data-descripcion="La suma combina cantidades. Practicaremos suma por columnas con llevadas."
-                    data-explicacion="<p>La <strong>suma por columnas</strong> alinea unidades con unidades y decenas con decenas. Si las unidades suman 10 o más, <em>llevas</em> 1 a las decenas.</p>"
-                    data-pasos='["Alinea por columnas","Suma unidades y lleva si es ≥ 10","Suma decenas incluyendo el llevado","Escribe el resultado"]'
-                    data-ejemplo='<div class="p-2 border rounded bg-light"><div class="fw-semibold mb-1">Ejemplo: 27 + 15</div><div class="font-monospace">  27<br>+ 15<br><span class="text-primary">────</span><br>  42</div><p class="mb-0 mt-2 small text-muted">Unidades: 7+5=12 (escribo 2, llevo 1). Decenas: 2+1+1(llevado)=4.</p></div>' 
-
-                    onclick="abrirContenidoDesdeData(this)">
-                     <i class="ri-eye-line me-1"></i>  
-                    Ver contenido
-                        </a>
+                     
                       </div>
                     </div>
                   </div>
                   {% for contenido in contenidos_por_tipo.Contenido %}
                   <div class="library-item card mb-3">
-                    <div class="card-body d-flex align-items-center justify-content-between gap-3">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-sm rounded-circle bg-light d-flex align-items-center justify-content-center">
-                          <i class="ri-book-line fs-5 text-secondary"></i>
-                        </div>
-                        <div class="text-truncate">
-                          <div class="fw-semibold text-truncate">{{ contenido.titulo }}</div>
-                          <div class="text-muted small text-truncate">{{ contenido.descripcion|default_if_none:""|truncatechars:120 }}</div>
-                        </div>
-                      </div>
-                      <a href="#"
-                         class="btn btn-sm btn-primary"
-                         data-bs-toggle="modal"
-                         data-bs-target="#contentModal"
-                         onclick="abrirContenido('{{ contenido.titulo|escapejs }}', '{{ contenido.descripcion|default_if_none:''|escapejs }}', '{{ contenido.descripcion|default_if_none:''|escapejs }}', '', '{{ contenido.contenido|default_if_none:''|escapejs }}')">
-                        <i class="ri-eye-line me-1"></i> Ver contenido
-                      </a>
-                    </div>
-                  </div>
+  <div class="card-body">
+    <div class="d-flex align-items-center justify-content-between gap-3">
+
+      <!-- Contenedor izquierdo: icono + texto -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="avatar-sm rounded-circle bg-light d-flex align-items-center justify-content-center">
+          <i class="ri-book-line fs-5 text-secondary"></i>
+        </div>
+
+        <div class="text-truncate">
+          <div class="fw-semibold text-truncate">{{ contenido.titulo }}</div>
+          <div class="text-muted small text-truncate">
+            {{ contenido.descripcion|default_if_none:""|truncatechars:120 }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón alineado a la derecha -->
+      <a href="#"
+         class="btn btn-sm btn-primary"
+         data-bs-toggle="modal"
+         data-bs-target="#contentModal"
+         onclick="abrirContenido('{{ contenido.titulo|escapejs }}',
+                                 '{{ contenido.descripcion|default_if_none:''|escapejs }}',
+                                 '{{ contenido.detalle_contenido.teoria|default_if_none:''|escapejs }}',
+                                 '{{ contenido.detalle_contenido.pasos_trucos|default_if_none:''|escapejs }}',
+                                 '{{ contenido.detalle_contenido.ejemplo|default_if_none:''|escapejs }}')">
+        <i class="ri-eye-line me-1"></i>
+        Ver contenido
+      </a>
+
+    </div>
+  </div>
+</div>
+
                   {% empty %}
                   <div class="text-center py-4">
                     <i class="ti ti-info-circle fs-1 text-muted mb-2"></i>
@@ -309,7 +307,34 @@
       </div>
 
     </div>
+
   </div>
+   <div class="position-absolute bottom-0 end-0 p-3" style="z-index: 10;">
+      <div class="d-flex align-items-center gap-3 bg-white shadow-sm p-3 rounded-3 border">
+
+        <label class="fw-semibold text-primary mb-0">¿Ha comprendido el tema?</label>
+
+        <!-- Radios -->
+        <div class="d-flex align-items-center gap-2">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="comprensionTema" id="comprensionSi" value="si">
+            <label class="form-check-label text-secondary" for="comprensionSi">Sí</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="comprensionTema" id="comprensionNo" value="no">
+            <label class="form-check-label text-secondary" for="comprensionNo">No</label>
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <button class="btn btn-primary fw-semibold px-3">
+          Confirmar
+        </button>
+
+      </div>
+    </div>
+
 </div>
 
 

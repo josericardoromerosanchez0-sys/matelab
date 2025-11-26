@@ -338,7 +338,7 @@
           if (misionCard) {
             const misionDescripcion = misionCard.querySelector('p')?.textContent || '';
             const misionEstado = misionCard.querySelector('.badge')?.textContent.trim() || '';
-  
+
             document.getElementById('misionTitulo').textContent = misionTitulo;
             document.getElementById('misionDescripcion').textContent = misionDescripcion;
             
@@ -361,6 +361,38 @@
           if (respuestaInput) respuestaInput.value = '';
           if (respuestaContainer) respuestaContainer.style.display = 'block';
           if (btnConfirmar) btnConfirmar.style.display = 'block';
+
+          // Si la misión está completada, deshabilitar entrada y botón
+          const estadoTexto = document.getElementById('misionEstado')?.textContent?.trim() || '';
+          const esCompletada = estadoTexto === 'Completada';
+          if (esCompletada) {
+            if (respuestaInput) {
+              respuestaInput.value = '';
+              respuestaInput.disabled = true;
+              respuestaInput.readOnly = true;
+            }
+            if (btnConfirmar) {
+              btnConfirmar.disabled = true;
+              btnConfirmar.style.pointerEvents = 'none';
+              btnConfirmar.classList.add('disabled');
+            }
+            if (respuestaContainer) {
+              respuestaContainer.style.display = 'none';
+            }
+          } else {
+            if (respuestaInput) {
+              respuestaInput.disabled = false;
+              respuestaInput.readOnly = false;
+            }
+            if (btnConfirmar) {
+              btnConfirmar.disabled = false;
+              btnConfirmar.style.pointerEvents = '';
+              btnConfirmar.classList.remove('disabled');
+            }
+            if (respuestaContainer) {
+              respuestaContainer.style.display = 'block';
+            }
+          }
         }
       });
     }

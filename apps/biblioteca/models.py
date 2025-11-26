@@ -30,7 +30,7 @@ class Biblioteca(models.Model):
 class Biblioteca_Usuario(models.Model):
     usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE, db_column='usuario_id')
     biblioteca = models.ForeignKey(Biblioteca, on_delete=models.CASCADE, db_column='biblioteca_id')
-    estado = models.BooleanField('Estado', default=True, db_column='activo')
+    estado = models.BooleanField('Estado', default=True, db_column='estado')
    
     class Meta:
         db_table = 'Biblioteca_Usuario'   
@@ -44,10 +44,15 @@ class Biblioteca_Usuario(models.Model):
 
 class Biblioteca_Contenido(models.Model):
     biblioteca_contenido_id = models.AutoField(primary_key=True)
-    biblioteca = models.ForeignKey(Biblioteca, on_delete=models.CASCADE, db_column='biblioteca_id')
+    biblioteca = models.OneToOneField(
+        Biblioteca,
+        on_delete=models.CASCADE,
+        related_name='detalle_contenido'
+    )
     teoria = models.TextField('Teoria', db_column='teoria')
     pasos_trucos = models.TextField('Pasos y Trucos', db_column='pasos_trucos')
-    ejemplos = models.TextField('Ejemplos', db_column='ejemplos')
+    ejemplo = models.TextField('Ejemplo', db_column='ejemplo')
+    tipo = models.TextField('Tipo', db_column='tipo')
     class Meta:
         db_table = 'Biblioteca_Contenido'   
         managed = False  

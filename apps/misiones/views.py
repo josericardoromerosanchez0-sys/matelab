@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from apps.biblioteca.models import Biblioteca_Usuario, Biblioteca_Contenido
 
 # Configurar el logger
 logger = logging.getLogger(__name__)
@@ -92,6 +93,46 @@ def lista_misiones(request):
         for m in misiones_qs.exclude(mision_id__in=ids_ya_incluidos).order_by('fecha_creacion'):
             misiones_ordenadas.append(m)
 
+        # Determinar tipos de misión desbloqueados por el usuario (por defecto bloqueadas)
+        unlocked_types = set()
+        try:
+            rol_usuario = getattr(request.user.rol, 'tipo', '')
+        except Exception:
+            rol_usuario = ''
+
+        if rol_usuario == 'Estudiante':
+            try:
+                biblioteca_ids = list(
+                    Biblioteca_Usuario.objects.filter(usuario=request.user, estado=True)
+                    .values_list('biblioteca_id', flat=True)
+                )
+                if biblioteca_ids:
+                    tipos_contenido = Biblioteca_Contenido.objects.filter(
+                        biblioteca_id__in=biblioteca_ids
+                    ).values_list('tipo', flat=True)
+                    for t in tipos_contenido:
+                        s = (t or '').strip().lower()
+                        # normalizar acentos comunes
+                        s = (s
+                             .replace('á', 'a')
+                             .replace('é', 'e')
+                             .replace('í', 'i')
+                             .replace('ó', 'o')
+                             .replace('ú', 'u'))
+                        # mapear posibles variantes a los choices de Mision.tipo_operacion
+                        if s in {'suma', 'resta', 'multiplicacion', 'division'}:
+                            unlocked_types.add(s)
+                        elif 'suma' in s:
+                            unlocked_types.add('suma')
+                        elif 'resta' in s:
+                            unlocked_types.add('resta')
+                        elif 'multiplic' in s:
+                            unlocked_types.add('multiplicacion')
+                        elif 'divis' in s:
+                            unlocked_types.add('division')
+            except Exception as e:
+                logger.warning(f"No se pudieron obtener tipos desbloqueados: {e}")
+
         # Crear una lista para almacenar las misiones con su estado
         misiones_con_estado = []
 
@@ -111,6 +152,12 @@ def lista_misiones(request):
                 
             # Agregar el estado como atributo a la misión
             mision.estado_actual = estado
+
+            # Calcular si la misión está bloqueada para el usuario actual
+            if rol_usuario == 'Profesor':
+                mision.bloqueada = False
+            else:
+                mision.bloqueada = ((mision.tipo_operacion or '').strip().lower() not in unlocked_types)
             misiones_con_estado.append(mision)
         
         # Obtener todas las habilidades para los filtros

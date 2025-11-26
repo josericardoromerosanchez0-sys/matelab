@@ -77,12 +77,12 @@ def crear_contenido(request):
             if request.POST.get('tipo') == 'Contenido':
                 teoria = request.POST.get('teoria', '')
                 pasos_trucos = request.POST.get('pasos_trucos', '')
-                ejemplos = request.POST.get('ejemplos', '')
+                ejemplo = request.POST.get('ejemplo', '')
                 detalle = Biblioteca_Contenido.objects.create(
                     biblioteca=contenido,
                     teoria=teoria,
                     pasos_trucos=pasos_trucos,
-                    ejemplos=ejemplos
+                    ejemplo=ejemplo
                 )
                 contenido_detalle_id = detalle.biblioteca_contenido_id
             

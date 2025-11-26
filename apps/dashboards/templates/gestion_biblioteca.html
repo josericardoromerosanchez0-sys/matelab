@@ -24,7 +24,7 @@
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Biblioteca</h5>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoContenido">
-          <i class="icon-base ri-add-line me-1"></i> Nuevo Contenido
+          <i class="icon-base ri-add-line me-1"></i> Agregar
         </button>
       </div>
       <div class="card-body">
@@ -137,7 +137,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Agregar Nuevo Contenido</h5>
+        <h5 class="modal-title">Agregar a Biblioteca</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -182,7 +182,7 @@
                     </div>
                     <div class="col-12">
                       <label class="form-label">Ejemplo</label>
-                      <textarea name="ejemplos" class="form-control" rows="4" placeholder="Puede incluir HTML básico si lo requiere"></textarea>
+                      <textarea name="ejemplo" class="form-control" rows="4" placeholder="Puede incluir HTML básico si lo requiere"></textarea>
                     </div>
                   </div>
                 </div>
@@ -330,7 +330,7 @@
         // Limpiar campos cuando no aplica
         $extra.find('textarea[name="teoria"]').val('');
         $extra.find('textarea[name="pasos_trucos"]').val('');
-        $extra.find('textarea[name="ejemplos"]').val('');
+        $extra.find('textarea[name="ejemplo"]').val('');
       }
     }
 

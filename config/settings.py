@@ -130,7 +130,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 # config/settings.py
-# config/settings.py
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'mssql'),

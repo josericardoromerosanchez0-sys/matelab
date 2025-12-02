@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.db.models import F
-from .models import Mision, Habilidad, IntentoMision, PolyaTrabajoUM
+from .models import Mision, Habilidad, IntentoMision, PolyaTrabajoUM, Sumandos
 import logging
 import json
 from django.http import JsonResponse
@@ -250,12 +250,57 @@ def obtener_polya_um(request, mision_id):
                 'comprobacion_otro_metodo': polya.comprobacion_otro_metodo or '',
                 'conclusion_final': polya.conclusion_final or '',
                 'confianza': polya.confianza if polya.confianza is not None else None,
+                'identificacion_operacion': getattr(polya, 'identificacion_operacion', '') or '',
+                'por_que_esa_operacion': getattr(polya, 'por_que_esa_operacion', '') or '',
+                'sumandos': list(Sumandos.objects.filter(polya_um_id=polya).values_list('sumando', flat=True)),
+                'solucion_correcta': mision.solucion_correcta or '',
             }
             return JsonResponse({'status': 'success', 'data': data})
         except PolyaTrabajoUM.DoesNotExist:
-            return JsonResponse({'status': 'success', 'data': None})
+            data = {
+                'que_se_pide': '',
+                'datos_conocidos': '',
+                'incognitas': '',
+                'representacion': '',
+                'estrategia_principal': '',
+                'tactica_similar': False,
+                'tactica_descomponer': False,
+                'tactica_ecuaciones': False,
+                'tactica_formula': False,
+                'desarrollo': '',
+                'resultados_intermedios': '',
+                'revision_verificacion': '',
+                'comprobacion_otro_metodo': '',
+                'conclusion_final': '',
+                'confianza': None,
+                'identificacion_operacion': '',
+                'por_que_esa_operacion': '',
+                'sumandos': [],
+                'solucion_correcta': mision.solucion_correcta or '',
+            }
+            return JsonResponse({'status': 'success', 'data': data})
     except Exception as e:
         logger.error(f"Error en obtener_polya_um: {str(e)}", exc_info=True)
+        return JsonResponse({'status': 'error', 'message': 'Error interno del servidor'}, status=500)
+
+
+@login_required
+@require_http_methods(["GET"]) 
+def obtener_alternativas_mision(request, mision_id):
+    try:
+        mision = get_object_or_404(Mision, pk=mision_id)
+        alternativas = []
+        for campo in ['alternativa1', 'alternativa2', 'alternativa3']:
+            val = getattr(mision, campo, None)
+            if isinstance(val, str) and val.strip():
+                alternativas.append(val.strip())
+        solucion_correcta = ''
+        valc = getattr(mision, 'solucion_correcta', None)
+        if isinstance(valc, str) and valc.strip():
+            solucion_correcta = valc.strip()
+        return JsonResponse({'status': 'success', 'alternativas': alternativas, 'solucion_correcta': solucion_correcta})
+    except Exception as e:
+        logger.error(f"Error en obtener_alternativas_mision: {str(e)}", exc_info=True)
         return JsonResponse({'status': 'error', 'message': 'Error interno del servidor'}, status=500)
 
 
@@ -286,12 +331,28 @@ def guardar_polya_um(request, mision_id):
         polya.revision_verificacion = payload.get('revision_verificacion')
         polya.comprobacion_otro_metodo = payload.get('comprobacion_otro_metodo')
         polya.conclusion_final = payload.get('conclusion_final')
+        polya.identificacion_operacion = payload.get('identificacion_operacion')
+        polya.por_que_esa_operacion = payload.get('por_que_esa_operacion')
         confianza_val = payload.get('confianza')
         try:
             polya.confianza = int(confianza_val) if confianza_val is not None else None
         except (TypeError, ValueError):
             polya.confianza = None
         polya.save()
+
+        # Actualizar sumandos asociados
+        try:
+            sumandos_payload = payload.get('sumandos', []) or []
+            if not isinstance(sumandos_payload, list):
+                sumandos_payload = []
+            Sumandos.objects.filter(polya_um_id=polya).delete()
+            for s in sumandos_payload:
+                if isinstance(s, str):
+                    texto = s.strip()
+                    if texto:
+                        Sumandos.objects.create(polya_um_id=polya, sumando=texto)
+        except Exception as e:
+            logger.error(f"Error al actualizar sumandos en guardar_polya_um: {str(e)}", exc_info=True)
 
         return JsonResponse({'status': 'success'})
     except json.JSONDecodeError:

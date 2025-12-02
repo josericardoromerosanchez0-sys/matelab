@@ -9,14 +9,14 @@ class Biblioteca(models.Model):
         ('Contenido', 'Contenido'),
     ]
     
-    id = models.AutoField(primary_key=True)
+    biblioteca_id = models.AutoField(primary_key=True)
     titulo = models.CharField('Título', max_length=255, db_column='Titulo')
     descripcion = models.TextField('Descripción', db_column='Descripcion')
     solucion = models.TextField('Solución', db_column='Solucion')
     tipo = models.CharField('Tipo', max_length=50, choices=TIPO_CHOICES, db_column='tipo')
     activo = models.BooleanField('Activo', default=True, db_column='activo')
     usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE, db_column='usuario_id')
-   
+
     class Meta:
         db_table = 'Biblioteca'   
         managed = False  
@@ -28,7 +28,7 @@ class Biblioteca(models.Model):
 
 
 class Biblioteca_Usuario(models.Model):
-    usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE, db_column='usuario_id')
+    usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE, db_column='usuario_id', primary_key=True)
     biblioteca = models.ForeignKey(Biblioteca, on_delete=models.CASCADE, db_column='biblioteca_id')
     estado = models.BooleanField('Estado', default=True, db_column='estado')
    

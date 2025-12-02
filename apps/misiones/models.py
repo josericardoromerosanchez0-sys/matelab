@@ -33,6 +33,10 @@ class Mision(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     activa = models.BooleanField(default=True)
     tipo_operacion = models.CharField(max_length=20, choices=TIPO_OPERACION_CHOICES)
+    alternativa1 = models.CharField('Alternativa 1', max_length=50, db_column='alternativa1')
+    alternativa2 = models.CharField('Alternativa 2', max_length=50, db_column='alternativa2')
+    alternativa3 = models.CharField('Alternativa 3', max_length=50, db_column='alternativa3')
+    solucion_correcta = models.CharField('Solución Correcta', max_length=50, db_column='solucion_correcta')
 
     class Meta:
         db_table = 'Mision'
@@ -109,6 +113,9 @@ class PolyaTrabajoUM(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    identificacion_operacion = models.TextField(null=True, blank=True)
+    por_que_esa_operacion = models.TextField(null=True, blank=True)
+
     class Meta:
         db_table = 'Polya_Trabajo_UM'
         verbose_name_plural = 'Trabajos Polya (Usuario-Misión)'
@@ -116,6 +123,21 @@ class PolyaTrabajoUM(models.Model):
 
     def __str__(self):
         return f"Polya UM - {self.usuario.nombre_usuario} / {self.mision.titulo}"
+
+
+
+class Sumandos(models.Model):
+    sumando_id = models.AutoField(primary_key=True)
+    polya_um_id =  models.ForeignKey(PolyaTrabajoUM, on_delete=models.CASCADE, db_column='polya_um_id')
+    sumando = models.TextField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'Sumandos'
+        verbose_name_plural = 'Sumandos'
+
+    def __str__(self):
+        return f"Sumando {self.sumando_id}"
+
 
 class Trofeo(models.Model):
     trofeo_id = models.AutoField(primary_key=True)

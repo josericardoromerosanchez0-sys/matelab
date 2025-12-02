@@ -10,6 +10,7 @@ from django.contrib.auth.hashers import make_password
 from ..dashboards.user_views import GestionUsuariosView
 from django.contrib.auth.hashers import check_password
 from apps.authentication.models import Usuarios
+from django.shortcuts import redirect
 
 TEMPLATE_MAP = {
     "estudiante": "layout/partials/menu/vertical/student_menu.html",
@@ -23,7 +24,8 @@ This file is a view controller for multiple pages as a module.
 Here you can override the page view layout.
 Refer to auth/urls.py file for more pages.
 """
-
+def home_redirect(request):
+    return redirect('auth-login-basic') 
 
 class AuthView(TemplateView):
     # Predefined function
@@ -66,11 +68,11 @@ def login_view(request):
             if user.contraseña_hash == password:
                 user_auth = authenticate(request, nombre_usuario=username, contraseña_hash=password)
                 auth_login(request, user_auth)
-                return redirect("/")
+                return redirect("/welcome")
             elif check_password(password, user.contraseña_hash):     
                 user_auth = authenticate(request, nombre_usuario=username, contraseña_hash=user.contraseña_hash)
                 auth_login(request, user_auth)
-                return redirect("/")
+                return redirect("/welcome")
  
         messages.error(request, "Usuario o contraseña inválidos")
 

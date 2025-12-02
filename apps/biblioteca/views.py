@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from web_project import TemplateLayout
-from .models import Biblioteca, Biblioteca_Contenido
+from .models import Biblioteca, Biblioteca_Contenido, Biblioteca_Usuario
 import random
 
 class GestionBibliotecaView(TemplateView):
@@ -41,7 +41,7 @@ class GestionBibliotecaView(TemplateView):
         contenidos_data = []
         for contenido in contenidos:
             contenidos_data.append({
-                'id': contenido.id,
+                'biblioteca_id': contenido.biblioteca_id,
                 'titulo': contenido.titulo,
                 'descripcion': contenido.descripcion,
                 'tipo': contenido.tipo,
@@ -119,7 +119,7 @@ def actualizar_contenido(request):
             return JsonResponse({'success': False, 'error': 'ID de usuario no proporcionado'}, status=400)
         
         try:
-            biblioteca = Biblioteca.objects.get(id=user_id)
+            biblioteca = Biblioteca.objects.get(biblioteca_id=user_id)
         except Biblioteca.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Usuario no encontrado'}, status=404)
         
@@ -148,7 +148,7 @@ def eliminar_contenido(request):
             return JsonResponse({'success': False, 'error': 'ID de usuario no proporcionado'}, status=400)
         
         try:
-            biblioteca = Biblioteca.objects.get(id=user_id)
+            biblioteca = Biblioteca.objects.get(biblioteca_id=user_id)
             biblioteca.delete()
             return JsonResponse({'success': True})
             
@@ -247,3 +247,27 @@ def practica(request):
     }
     
     return render(request, 'practicas/practica.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def marcar_contenido_visto(request):
+    try:
+        biblioteca_id = request.POST.get('biblioteca_id') or request.GET.get('biblioteca_id')
+        if not biblioteca_id:
+            return JsonResponse({'success': False, 'message': 'biblioteca_id requerido'}, status=400)
+
+        try:
+            biblioteca = Biblioteca.objects.get(biblioteca_id=biblioteca_id)
+        except Biblioteca.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Contenido de biblioteca no encontrado'}, status=404)
+
+        obj, _created = Biblioteca_Usuario.objects.update_or_create(
+            usuario=request.user,
+            biblioteca=biblioteca,
+            defaults={'estado': True}
+        )
+
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

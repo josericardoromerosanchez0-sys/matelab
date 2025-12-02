@@ -96,7 +96,7 @@
                         <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep1-{{ mision.mision_id }}" aria-expanded="true"
                                 aria-controls="polyaStep1-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-primary">1</span> Comprender el problema
+                            <span class="me-2 badge bg-label-primary">1</span> Identificar la operación
                         </button>
                     </h2>
                     <div id="polyaStep1-{{ mision.mision_id }}" class="accordion-collapse collapse show"
@@ -109,21 +109,29 @@
                                         {{ mision.descripcion|default:"Sin descripción" }}
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">¿Qué se pide?</label>
-                                    <textarea class="form-control" rows="2" name="polya_que_se_pide_{{ mision.mision_id }}" placeholder="Describe claramente el objetivo" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
+                                <div class="col-12">
+                                    <label class="form-label">Identificación de la operación</label>
+                                    <select class="form-select" name="polya_identificacion_operacion_{{ mision.mision_id }}" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}>
+                                        <option value="" selected>Selecciona una operación</option>
+                                        <option value="suma">Suma</option>
+                                        <option value="resta">Resta</option>
+                                        <option value="multiplicacion">Multiplicación</option>
+                                        <option value="division">División</option>
+                                    </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Datos conocidos</label>
-                                    <textarea class="form-control" rows="2" name="polya_datos_{{ mision.mision_id }}" placeholder="Lista de datos relevantes" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
+                                <div class="col-12">
+                                    <label class="form-label">¿Por qué esa operación?</label>
+                                    <textarea class="form-control" rows="2" name="polya_por_que_operacion_{{ mision.mision_id }}" placeholder="Explica por qué elegiste esa operación" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Incógnitas</label>
-                                    <textarea class="form-control" rows="2" name="polya_incognitas_{{ mision.mision_id }}" placeholder="¿Qué necesitas encontrar?" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Representación</label>
-                                    <input type="text" class="form-control" name="polya_representacion_{{ mision.mision_id }}" placeholder="Dibujo/diagrama/ecuación sugerida" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}>
+                                <div class="col-12">
+                                    <label class="form-label mb-1">Sumandos</label>
+                                    <small class="text-muted d-block mb-2">Agrega los números que intervienen en la operación (por ejemplo, 4 y 5 si es 4 + 5).</small>
+                                    <div id="sumandos-container-{{ mision.mision_id }}"></div>
+                                    {% if user.rol.tipo != 'Profesor' %}
+                                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btn-add-sumando-{{ mision.mision_id }}">
+                                        <i class="ti ti-plus me-1"></i> Agregar sumando
+                                    </button>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -134,7 +142,7 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep2-{{ mision.mision_id }}" aria-expanded="false"
                                 aria-controls="polyaStep2-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-info">2</span> Planificar la estrategia
+                            <span class="me-2 badge bg-label-info">2</span> Estrategia principal
                         </button>
                     </h2>
                     <div id="polyaStep2-{{ mision.mision_id }}" class="accordion-collapse collapse"
@@ -143,36 +151,7 @@
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label class="form-label">Estrategia principal</label>
-                                    <textarea class="form-control" rows="2" name="polya_estrategia_{{ mision.mision_id }}" placeholder="Describe el plan general" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Tácticas</label>
-                                    <div class="row g-2">
-                                        <div class="col-sm-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="tac1-{{ mision.mision_id }}" {% if user.rol.tipo == 'Profesor' %}disabled{% endif %}>
-                                                <label class="form-check-label" for="tac1-{{ mision.mision_id }}">Buscar un problema similar</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="tac2-{{ mision.mision_id }}" {% if user.rol.tipo == 'Profesor' %}disabled{% endif %}>
-                                                <label class="form-check-label" for="tac2-{{ mision.mision_id }}">Descomponer en partes</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="tac3-{{ mision.mision_id }}" {% if user.rol.tipo == 'Profesor' %}disabled{% endif %}>
-                                                <label class="form-check-label" for="tac3-{{ mision.mision_id }}">Usar ecuaciones o gráficos</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="tac4-{{ mision.mision_id }}" {% if user.rol.tipo == 'Profesor' %}disabled{% endif %}>
-                                                <label class="form-check-label" for="tac4-{{ mision.mision_id }}">Aplicar fórmula/teorema</label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <textarea class="form-control" rows="3" name="polya_estrategia_{{ mision.mision_id }}" placeholder="Describe el plan general para resolver la misión" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
                                 </div>
                             </div>
                         </div>
@@ -183,7 +162,7 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep3-{{ mision.mision_id }}" aria-expanded="false"
                                 aria-controls="polyaStep3-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-warning">3</span> Ejecutar el plan
+                            <span class="me-2 badge bg-label-warning">3</span> Desarrollo y práctica de cálculo
                         </button>
                     </h2>
                     <div id="polyaStep3-{{ mision.mision_id }}" class="accordion-collapse collapse"
@@ -191,12 +170,28 @@
                         <div class="accordion-body">
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label class="form-label">Desarrollo y cálculos</label>
-                                    <textarea class="form-control" rows="4" name="polya_desarrollo_{{ mision.mision_id }}" placeholder="Escribe cada paso de forma ordenada" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
+                                    <label class="form-label">Desarrollo</label>
+                                    <textarea class="form-control" rows="4" name="polya_desarrollo_{{ mision.mision_id }}" placeholder="Escribe paso a paso cómo resuelves la misión" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">Resultados intermedios</label>
-                                    <input type="text" class="form-control" name="polya_resultados_intermedios_{{ mision.mision_id }}" placeholder="Valores o expresiones clave obtenidas" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}>
+                                    <label class="form-label mb-1">Calculadora de práctica</label>
+                                    <small class="text-muted d-block mb-2">Usa estos campos para practicar los cálculos con los sumandos.</small>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-sm-4">
+                                            <input type="number" class="form-control" id="polya-calc-a-{{ mision.mision_id }}" placeholder="Número 1" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <input type="number" class="form-control" id="polya-calc-b-{{ mision.mision_id }}" placeholder="Número 2" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            {% if user.rol.tipo != 'Profesor' %}
+                                            <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="btn-polya-calc-{{ mision.mision_id }}">
+                                                <i class="ti ti-equal me-1"></i> Calcular suma
+                                            </button>
+                                            {% endif %}
+                                            <div class="small text-muted">Resultado: <span id="polya-calc-result-{{ mision.mision_id }}">—</span></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -208,7 +203,7 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep4-{{ mision.mision_id }}" aria-expanded="false"
                                 aria-controls="polyaStep4-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-success">4</span> Revisar y comprobar
+                            <span class="me-2 badge bg-label-success">4</span> Verificar y revisar
                         </button>
                     </h2>
                     <div id="polyaStep4-{{ mision.mision_id }}" class="accordion-collapse collapse"
@@ -221,24 +216,14 @@
                                 </div>
                                 <div id="polya-solucion-text-{{ mision.mision_id }}" class="bg-light rounded p-2"></div>
                             </div>
-                            <div class="row g-2">
-                                <div class="col-md-6">
+                            <div class="row g-3">
+                                <div class="col-12">
                                     <label class="form-label">Revisión / verificación</label>
                                     <div class="form-control-plaintext small border rounded p-2 bg-light" id="polya-revision-text-{{ mision.mision_id }}"></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Comprobación con otro método</label>
-                                    <div class="form-control-plaintext small border rounded p-2 bg-light" id="polya-comp-text-{{ mision.mision_id }}"></div>
-                                </div>
-                                <div class="col-md-8">
-                                    <label class="form-label">Conclusión final</label>
-                                    <div class="form-control-plaintext small border rounded p-2 bg-light" id="polya-concl-text-{{ mision.mision_id }}"></div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Confianza</label>
-                                    <div>
-                                        <span class="badge bg-label-primary" id="polya-confianza-badge-{{ mision.mision_id }}">—</span>
-                                    </div>
+                                <div class="col-12">
+                                    <label class="form-label">Solución correcta de la misión</label>
+                                    <div class="alert alert-success py-2 px-3 mb-0" id="polya-solucion-correcta-{{ mision.mision_id }}">—</div>
                                 </div>
                             </div>
                         </div>
@@ -248,28 +233,24 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep4-{{ mision.mision_id }}" aria-expanded="false"
                                 aria-controls="polyaStep4-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-success">4</span> Revisar y comprobar
+                            <span class="me-2 badge bg-label-success">4</span> Verificar y revisar
                         </button>
                     </h2>
                     <div id="polyaStep4-{{ mision.mision_id }}" class="accordion-collapse collapse"
                          aria-labelledby="polyaHeading4-{{ mision.mision_id }}" data-bs-parent="#polyaAccordion-{{ mision.mision_id }}">
                         <div class="accordion-body">
-                            <div class="row g-2">
-                                <div class="col-md-6">
+                            <div class="row g-3">
+                                <div class="col-12">
                                     <label class="form-label">Revisión / verificación</label>
                                     <textarea class="form-control form-control-sm" rows="2" name="polya_revision_verificacion_{{ mision.mision_id }}" placeholder="Comprueba si tu resultado tiene sentido"></textarea>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Comprobación con otro método</label>
-                                    <textarea class="form-control form-control-sm" rows="2" name="polya_comprobacion_otro_metodo_{{ mision.mision_id }}" placeholder="Intenta validar con un método alternativo"></textarea>
+                                    <label class="form-label">Mi resultado (opcional)</label>
+                                    <input type="text" class="form-control form-control-sm" id="polya-mi-resultado-{{ mision.mision_id }}" placeholder="Escribe aquí tu resultado final">
                                 </div>
-                                <div class="col-md-8">
-                                    <label class="form-label">Conclusión final</label>
-                                    <textarea class="form-control form-control-sm" rows="2" name="polya_conclusion_final_{{ mision.mision_id }}" placeholder="Resume tu solución y hallazgos"></textarea>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Confianza (0–100)</label>
-                                    <input type="number" class="form-control form-control-sm" name="polya_confianza_{{ mision.mision_id }}" min="0" max="100" placeholder="0-100">
+                                <div class="col-md-6">
+                                    <label class="form-label">Solución correcta de la misión</label>
+                                    <div class="alert alert-success py-2 px-3 mb-0" id="polya-solucion-correcta-{{ mision.mision_id }}">—</div>
                                 </div>
                             </div>
                         </div>
@@ -303,6 +284,66 @@
   var concl = getByName('polya_conclusion_final');
   var conf = getByName('polya_confianza');
 
+  var identOp = getByName('polya_identificacion_operacion');
+  var porQueOp = getByName('polya_por_que_operacion');
+  var sumandosContainer = document.getElementById('sumandos-container-' + mid);
+  var addSumandoBtn = document.getElementById('btn-add-sumando-' + mid);
+  var solucionCorrectaBox = document.getElementById('polya-solucion-correcta-' + mid);
+  var calcA = document.getElementById('polya-calc-a-' + mid);
+  var calcB = document.getElementById('polya-calc-b-' + mid);
+  var calcResult = document.getElementById('polya-calc-result-' + mid);
+  var calcBtn = document.getElementById('btn-polya-calc-' + mid);
+
+  function getSumandosFromInputs(){
+    if (!sumandosContainer) return [];
+    var inputs = sumandosContainer.querySelectorAll('input[name="polya_sumando_' + mid + '"]');
+    var items = [];
+    inputs.forEach(function(inp){
+      var v = (inp.value || '').trim();
+      if (v) items.push(v);
+    });
+    return items;
+  }
+
+  function renderSumandos(values){
+    if (!sumandosContainer) return;
+    sumandosContainer.innerHTML = '';
+    var list = (Array.isArray(values) && values.length) ? values : [''];
+    list.forEach(function(v){
+      var group = document.createElement('div');
+      group.className = 'mb-2';
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control';
+      input.name = 'polya_sumando_' + mid;
+      input.placeholder = 'Ingresa un número o sumando';
+      input.value = v || '';
+      group.appendChild(input);
+      sumandosContainer.appendChild(group);
+    });
+  }
+
+  if (addSumandoBtn && sumandosContainer){
+    addSumandoBtn.addEventListener('click', function(){
+      var actuales = getSumandosFromInputs();
+      actuales.push('');
+      renderSumandos(actuales);
+    });
+  }
+
+  if (calcBtn && calcA && calcB && calcResult){
+    calcBtn.addEventListener('click', function(){
+      var a = parseFloat(calcA.value);
+      var b = parseFloat(calcB.value);
+      if (isNaN(a) || isNaN(b)){
+        calcResult.textContent = '—';
+        return;
+      }
+      var r = a + b;
+      calcResult.textContent = r;
+    });
+  }
+
   function load(){
     try {
       fetch(obtenerUrl, { credentials: 'same-origin' })
@@ -325,6 +366,10 @@
             if (comp) comp.value = data.comprobacion_otro_metodo || '';
             if (concl) concl.value = data.conclusion_final || '';
             if (conf) conf.value = (data.confianza !== null && data.confianza !== undefined) ? data.confianza : '';
+            if (identOp) identOp.value = data.identificacion_operacion || '';
+            if (porQueOp) porQueOp.value = data.por_que_esa_operacion || '';
+            if (sumandosContainer) renderSumandos(data.sumandos || []);
+            if (solucionCorrectaBox) solucionCorrectaBox.textContent = data.solucion_correcta || '—';
           }
         });
     } catch(e) {}
@@ -349,7 +394,10 @@
         revision_verificacion: rev ? rev.value : null,
         comprobacion_otro_metodo: comp ? comp.value : null,
         conclusion_final: concl ? concl.value : null,
-        confianza: conf && conf.value !== '' ? parseInt(conf.value, 10) : null
+        confianza: conf && conf.value !== '' ? parseInt(conf.value, 10) : null,
+        identificacion_operacion: identOp ? identOp.value : null,
+        por_que_esa_operacion: porQueOp ? porQueOp.value : null,
+        sumandos: getSumandosFromInputs()
       };
       fetch(guardarUrl, {
         method: 'POST',

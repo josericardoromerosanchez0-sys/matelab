@@ -175,18 +175,7 @@
                 </div>
                 <div class="card-body">
                   <p class="text-muted mb-4 text-center">Explora materiales, guías y recursos detallados.</p>
-                  <div class="card mb-3">
-                    <div class="card-body">
-                      <div class="d-flex align-items-center justify-content-between gap-3">
-                        <div class="d-flex align-items-center gap-3">
-                          <div class="avatar-sm rounded-circle bg-light d-flex align-items-center justify-content-center">
-                            <i class="ri-book-line fs-5 text-secondary"></i>
-                          </div> 
-                        </div>
-                     
-                      </div>
-                    </div>
-                  </div>
+               
                   {% for contenido in contenidos_por_tipo.Contenido %}
                   <div class="library-item card mb-3">
   <div class="card-body">
@@ -211,11 +200,13 @@
          class="btn btn-sm btn-primary"
          data-bs-toggle="modal"
          data-bs-target="#contentModal"
+         data-biblioteca-id="{{ contenido.biblioteca_id }}"
          onclick="abrirContenido('{{ contenido.titulo|escapejs }}',
                                  '{{ contenido.descripcion|default_if_none:''|escapejs }}',
                                  '{{ contenido.detalle_contenido.teoria|default_if_none:''|escapejs }}',
                                  '{{ contenido.detalle_contenido.pasos_trucos|default_if_none:''|escapejs }}',
-                                 '{{ contenido.detalle_contenido.ejemplo|default_if_none:''|escapejs }}')">
+                                 '{{ contenido.detalle_contenido.ejemplo|default_if_none:''|escapejs }}',
+                                 '{{ contenido.biblioteca_id }}')">
         <i class="ri-eye-line me-1"></i>
         Ver contenido
       </a>
@@ -328,7 +319,7 @@
         </div>
 
         <!-- Botón -->
-        <button class="btn btn-primary fw-semibold px-3">
+        <button class="btn btn-primary fw-semibold px-3" id="btnConfirmarComprension">
           Confirmar
         </button>
 
@@ -609,9 +600,13 @@ function abrirContenidoDesdeData(element) {
   abrirContenido(titulo, descripcion, explicacion, pasos, ejemplo);
 }
 
-function abrirContenido(titulo, descripcion, teoria, pasos, ejemploHtml) {
+var bibliotecaIdActual = null;
+
+function abrirContenido(titulo, descripcion, teoria, pasos, ejemploHtml, bibliotecaId) {
   const modalEl = document.getElementById('contentModal');
   const modal = new bootstrap.Modal(modalEl);
+
+  bibliotecaIdActual = bibliotecaId || null;
 
   document.getElementById('contentModalLabel').textContent = titulo || 'Contenido';
 
@@ -670,6 +665,50 @@ function compararRespuestas(userVal, correctVal){
   const cn = Number(correctVal);
   if (!isNaN(un) && !isNaN(cn)) return un === cn;
   return u === c;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  var btnComprension = document.getElementById('btnConfirmarComprension');
+  if (btnComprension) {
+    btnComprension.addEventListener('click', function(){
+      var seleccion = document.querySelector('input[name="comprensionTema"]:checked');
+      if (!seleccion || seleccion.value !== 'si') {
+        return;
+      }
+      if (!bibliotecaIdActual) {
+        return;
+      }
+      var formData = new FormData();
+      formData.append('biblioteca_id', bibliotecaIdActual);
+      var url = "{% url 'biblioteca:marcar_contenido_visto' %}";
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData,
+        credentials: 'same-origin'
+      }).then(function(r){ return r.json(); }).then(function(j){
+        console.log('marcar_contenido_visto', j);
+      }).catch(function(e){ console.error(e); });
+    });
+  }
+});
+
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
 }
 
     let timeLeft = 30;

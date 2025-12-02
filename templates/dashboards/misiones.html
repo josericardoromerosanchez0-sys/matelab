@@ -140,7 +140,10 @@
           <div class="col-md-8">
             <h6 class="text-muted mb-3">Descripción de la misión</h6>
             <div id="misionDescripcion" class="mb-4"></div>
-            
+            <div id="opcionesContainer" class="mb-4" style="display:none;">
+              <h6 class="text-muted mb-3">Selecciona una opción</h6>
+              <div id="opcionesLista" class="list-group"></div>
+            </div>
           
           </div>
           
@@ -349,6 +352,51 @@
                                                 misionEstado === 'En progreso' ? 'bg-label-info' : 'bg-label-warning');
             }
 
+            // Cargar alternativas SOLO desde la misión y mostrarlas aleatorias (incluyendo solución correcta)
+            const opcionesContainer = document.getElementById('opcionesContainer');
+            const opcionesLista = document.getElementById('opcionesLista');
+            if (opcionesLista) opcionesLista.innerHTML = '';
+            if (opcionesContainer) opcionesContainer.style.display = 'none';
+
+            if (misionId && opcionesContainer && opcionesLista) {
+              fetch(`/misiones/api/misiones/${misionId}/alternativas/`, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(j => {
+                  if (!j || j.status !== 'success') return;
+                  const alternativas = Array.isArray(j.alternativas) ? j.alternativas.filter(v => typeof v === 'string' && v.trim() !== '') : [];
+                  const opciones = [];
+                  if (typeof j.solucion_correcta === 'string' && j.solucion_correcta.trim() !== '') {
+                    opciones.push(j.solucion_correcta.trim());
+                  }
+                  opciones.push(...alternativas);
+                  if (opciones.length === 0) return;
+                  // Barajar
+                  for (let i = opciones.length - 1; i > 0; i--) {
+                    const jdx = Math.floor(Math.random() * (i + 1));
+                    [opciones[i], opciones[jdx]] = [opciones[jdx], opciones[i]];
+                  }
+                  const letras = ['A', 'B', 'C', 'D'];
+                  // Limitar a 4 opciones máximo
+                  const limitado = opciones.slice(0, 4);
+                  limitado.forEach((valor, idx) => {
+                    const letra = letras[idx] || String.fromCharCode(65 + idx);
+                    const id = `op_${misionId}_${idx}`;
+                    const item = document.createElement('label');
+                    item.className = 'list-group-item list-group-item-action d-flex align-items-start gap-3';
+                    const textoOpcion = valor.replace(/\"/g, '"');
+                    const safeValue = valor.replace(/"/g, '&quot;');
+                    item.innerHTML = `
+                      <input class=\"form-check-input mt-1\" type=\"radio\" name=\"opcionMision\" id=\"${id}\" value=\"${safeValue}\">\n                      <div class=\"w-100\">\n                        <div class=\"d-flex justify-content-between\">\n                          <strong>${letra}</strong>\n                        </div>\n                        <div class=\"small text-body\">${textoOpcion}</div>\n                      </div>\n                    `;
+                    opcionesLista.appendChild(item);
+                  });
+                  // Ocultar textarea si hay opciones de selección
+                  const respuestaContainer = document.getElementById('respuestaContainer');
+                  if (respuestaContainer) respuestaContainer.style.display = 'none';
+                  opcionesContainer.style.display = '';
+                })
+                .catch(() => {});
+            }
+
           }
           
           if (vistaEstudiante) vistaEstudiante.style.display = 'block';
@@ -362,7 +410,7 @@
           if (respuestaContainer) respuestaContainer.style.display = 'block';
           if (btnConfirmar) btnConfirmar.style.display = 'block';
 
-          // Si la misión está completada, deshabilitar entrada y botón
+          // Si la misión está completada, deshabilitar entrada, botón y opciones
           const estadoTexto = document.getElementById('misionEstado')?.textContent?.trim() || '';
           const esCompletada = estadoTexto === 'Completada';
           if (esCompletada) {
@@ -379,6 +427,8 @@
             if (respuestaContainer) {
               respuestaContainer.style.display = 'none';
             }
+            const opcionesContainer = document.getElementById('opcionesContainer');
+            if (opcionesContainer) opcionesContainer.style.display = 'none';
           } else {
             if (respuestaInput) {
               respuestaInput.disabled = false;
@@ -416,12 +466,20 @@
   async function manejarConfirmarRespuesta() {
     const btnConfirmar = this;
     const respuestaInput = document.getElementById('respuestaMision');
-    const respuesta = respuestaInput?.value.trim() || '';
+    const opcionesLista = document.getElementById('opcionesLista');
+    const hayOpciones = !!(opcionesLista && opcionesLista.children && opcionesLista.children.length > 0);
+    let respuesta = '';
+    if (hayOpciones) {
+      const seleccionRadio = document.querySelector('input[name="opcionMision"]:checked');
+      respuesta = (seleccionRadio && seleccionRadio.value) ? seleccionRadio.value.trim() : '';
+    } else {
+      respuesta = respuestaInput?.value.trim() || '';
+    }
     const modal = bootstrap.Modal.getInstance(document.getElementById('misionDetalleModal'));
     
     if (!respuesta) {
       const toast = new bootstrap.Toast(document.getElementById('toastError'));
-      document.querySelector('#toastError .toast-body').textContent = 'Por favor, escribe una respuesta antes de enviar.';
+      document.querySelector('#toastError .toast-body').textContent = hayOpciones ? 'Por favor, selecciona una opción antes de enviar.' : 'Por favor, escribe una respuesta antes de enviar.';
       toast.show();
       return;
     }

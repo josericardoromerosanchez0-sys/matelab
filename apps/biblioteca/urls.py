@@ -10,4 +10,5 @@ urlpatterns = [
     path('<int:pk>/detalle/', views.detalle_contenido, name='detalle'),
     path('juego_operaciones/', views.juego_operaciones, name='juego_operaciones'),
     path('practica/', views.practica, name='practica'),
+    path('marcar_contenido_visto/', views.marcar_contenido_visto, name='marcar_contenido_visto'),
 ]

@@ -20,13 +20,15 @@ from django.urls import include, path
 from web_project.views import SystemView
 from django.conf import settings
 from django.conf.urls.static import static
-
+from apps.authentication.views import home_redirect
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
+    path("", home_redirect, name="home_redirect"),
+    
     # Dashboard urls
-    path("", include("apps.dashboards.urls")),
+    path("welcome", include("apps.dashboards.urls")),
 
     # layouts urls
     path("", include("apps.layouts.urls")),

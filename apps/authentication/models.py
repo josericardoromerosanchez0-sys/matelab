@@ -23,7 +23,7 @@ class Rol(models.Model):
 
     class Meta:
         db_table = 'Rol'
-        managed = False  # La tabla ya existe en la base de datos
+        managed = False 
 
     def __str__(self):
         return self.tipo
@@ -42,7 +42,7 @@ class Usuarios(models.Model):
 
     class Meta:
         db_table = 'Usuarios'
-        managed = False  # Importante: No gestiona la creación/eliminación
+        managed = False 
 
     def __str__(self):
         return self.nombre_usuario

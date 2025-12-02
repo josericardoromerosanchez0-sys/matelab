@@ -8,20 +8,20 @@ ENV PYTHONUNBUFFERED=1
 # Directorio de trabajo
 WORKDIR /app
 
-# --------- Instalar dependencias de sistema + driver ODBC 18 ---------
+# --------- Instalar dependencias de sistema + driver ODBC 17 ---------
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        curl \
-        gnupg2 \
-        apt-transport-https \
-        unixodbc-dev \
-        ca-certificates && \
-    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    curl https://packages.microsoft.com/config/debian/12/prod.list \
-        > /etc/apt/sources.list.d/mssql-release.list && \
+    curl \
+    gnupg2 \
+    ca-certificates \
+    apt-transport-https \
+    unixodbc-dev && \
+    mkdir -p /usr/share/keyrings && \
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" \
+    > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
-    ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
-        msodbcsql18 && \
+    ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql17 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # --------- Instalar dependencias de Python ---------
@@ -31,11 +31,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # --------- Copiar código del proyecto ---------
 COPY . .
 
-# Variables dentro del contenedor
+# Variables por defecto dentro del contenedor
 ENV DJANGO_SETTINGS_MODULE=config.settings
 ENV PORT=8000
 
-# --------- Collectstatic ---------
+# --------- Collectstatic (usa tus settings de STATIC_ROOT) ---------
 RUN python manage.py collectstatic --noinput
 
 # --------- Comando de arranque ---------

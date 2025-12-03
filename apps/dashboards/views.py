@@ -63,12 +63,23 @@ class DashboardsView(TemplateView):
         total_misiones = misiones.count()
         misiones_completadas = intentos_usuario.filter(estado='completado').values('mision').distinct().count()
         misiones_en_progreso = intentos_usuario.filter(estado='en_progreso').values('mision').distinct().count()
+        misiones_pendientes = max(total_misiones - misiones_completadas - misiones_en_progreso, 0)
         total_habilidades = Habilidad.objects.count()
         
         # Calcular tasa de éxito (éxitos / total de intentos)
         total_intentos = intentos_usuario.count()
         exitos = intentos_usuario.filter(estado='completado').count()
         tasa_exito = round((exitos / total_intentos * 100), 1) if total_intentos > 0 else 0
+
+        # Calcular porcentajes de misiones por estado
+        if total_misiones > 0:
+            porcentaje_completadas = round((misiones_completadas / total_misiones * 100), 1)
+            porcentaje_en_progreso = round((misiones_en_progreso / total_misiones * 100), 1)
+            porcentaje_pendientes = round((misiones_pendientes / total_misiones * 100), 1)
+        else:
+            porcentaje_completadas = 0
+            porcentaje_en_progreso = 0
+            porcentaje_pendientes = 0
         
         # Calcular progreso semanal
         misiones_semana_actual = intentos_usuario.filter(
@@ -114,9 +125,13 @@ class DashboardsView(TemplateView):
             'misiones_totales': total_misiones,
             'misiones_completadas': misiones_completadas,
             'misiones_en_progreso': misiones_en_progreso,
+            'misiones_pendientes': misiones_pendientes,
             'total_habilidades': total_habilidades,
             'tasa_exito': tasa_exito,
             'porcentaje_completado': round((misiones_completadas / total_misiones * 100), 1) if total_misiones > 0 else 0,
+            'porcentaje_completadas': porcentaje_completadas,
+            'porcentaje_en_progreso': porcentaje_en_progreso,
+            'porcentaje_pendientes': porcentaje_pendientes,
             'misiones_semana_actual': misiones_semana_actual,
             'misiones_semana_anterior': misiones_semana_anterior,
             'misiones_tendencia_porcentaje': misiones_tendencia_porcentaje,

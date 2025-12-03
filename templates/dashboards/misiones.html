@@ -27,6 +27,15 @@
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold mb-0">Misiones</h2>
+            <div class="d-flex align-items-center gap-2">
+              <select id="missionFilterOp" class="form-select form-select-sm" style="min-width: 190px; background-color: #6f42c1; color: #fff; border-color: #6f42c1;">
+                <option value="todas" selected>Operación: Todas</option>
+                <option value="suma">Operación: Suma</option>
+                <option value="resta">Operación: Resta</option>
+                <option value="multiplicacion">Operación: Multiplicación</option>
+                <option value="division">Operación: División</option>
+              </select>
+            </div>
           </div>
 
           <div class="row g-4" id="misiones-container">
@@ -209,6 +218,22 @@
 
 {% block page_js %}
 <script>
+  // Filtro por operación en Misiones
+  document.addEventListener('DOMContentLoaded', function(){
+    var missionFilter = document.getElementById('missionFilterOp');
+    function applyMissionFilter(){
+      var val = (missionFilter && missionFilter.value) ? missionFilter.value.toLowerCase() : 'todas';
+      var cards = document.querySelectorAll('#misiones-container .mision-card');
+      cards.forEach(function(card){
+        var op = (card.getAttribute('data-operacion') || '').toLowerCase();
+        if (val === 'todas' || op === val) card.classList.remove('d-none');
+        else card.classList.add('d-none');
+      });
+    }
+    applyMissionFilter();
+    if (missionFilter) missionFilter.addEventListener('change', applyMissionFilter);
+  });
+
   const modalElement = document.getElementById('misionDetalleModal');
   let modal = null;
 
@@ -842,5 +867,15 @@
 
   window.addEventListener('beforeunload', cleanupModal);
 </script> 
+{% endblock %}
+{% block page_css %}
+<style>
+  /* Borde lateral por operación para tarjetas de misión */
+  #misiones-container .mision-card > .card { border-left: 4px solid #e9ecef; }
+  #misiones-container .mision-card[data-operacion="suma"] > .card { border-left-color: #28c76f; }
+  #misiones-container .mision-card[data-operacion="resta"] > .card { border-left-color: #ff9f43; }
+  #misiones-container .mision-card[data-operacion="multiplicacion"] > .card { border-left-color: #7367f0; }
+  #misiones-container .mision-card[data-operacion="division"] > .card { border-left-color: #ea5455; }
+</style>
 {% endblock %}
 {% endblock %}

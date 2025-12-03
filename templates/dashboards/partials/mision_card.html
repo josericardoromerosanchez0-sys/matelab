@@ -1,10 +1,10 @@
-<div class="col-12 mision-card" data-mision-id="{{ mision.mision_id }}" data-bloqueada="{% if mision.bloqueada %}true{% else %}false{% endif %}" {% if not show_mission %}style="display: none;"{% endif %}>
+<div class="col-12 mision-card" data-mision-id="{{ mision.mision_id }}" data-bloqueada="{% if mision.bloqueada %}true{% else %}false{% endif %}" data-operacion="{{ mision.tipo_operacion|lower }}" {% if not show_mission %}style="display: none;"{% endif %}>
     <div class="card h-100">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start">
                 <div class="d-flex align-items-center">
                     <div>
-                        <h5 class="mb-0">{{ mision.titulo }}</h5>
+                        <h5 class="mb-0">{{ mision.titulo }} {% if mision.tipo_operacion %}<span class="badge bg-label-primary ms-2 text-uppercase">{{ mision.tipo_operacion }}</span>{% endif %}</h5>
                         <small class="text-muted">#MIS-{{ mision.mision_id|stringformat:"03d" }}</small>
                     </div>
                 </div>
@@ -72,11 +72,17 @@
                 {% endif %}
             </div>
             <hr class="my-3">
-            <div id="polya-container-{{ mision.mision_id }}" {% if user.rol.tipo == 'Profesor' %}style="display:none;"{% endif %}>
+            <div id="polya-container-{{ mision.mision_id }}" {% if user.rol.tipo == 'Profesor' %}style="display:none;"{% endif %} {% if mision.bloqueada and user.rol.tipo != 'Profesor' %}style="position: relative;"{% endif %}>
             <div class="mb-2 d-flex align-items-center">
                 <i class="ti ti-brain text-primary me-2"></i>
                 <h6 class="mb-0">Método de Pólya</h6>
             </div>
+            {% if mision.bloqueada and user.rol.tipo != 'Profesor' %}
+            <div class="alert alert-secondary mb-2">
+              Esta misión está bloqueada. Ve a <strong>Biblioteca</strong> y confirma el contenido correspondiente para habilitar el método de Pólya.
+            </div>
+            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(255,255,255,0.6); z-index: 3;"></div>
+            {% endif %}
             <div class="progress mb-3" style="height: 8px;">
                 <div id="progress-bar-{{ mision.mision_id }}" class="progress-bar bg-success" role="progressbar"
                      style="width: {% if mision.estado_actual == 'completado' %}100{% elif mision.estado_actual == 'en_progreso' %}60{% elif mision.estado_actual == 'rechazado' %}25{% else %}10{% endif %}%"
@@ -96,7 +102,7 @@
                         <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep1-{{ mision.mision_id }}" aria-expanded="true"
                                 aria-controls="polyaStep1-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-primary">1</span> Identificar la operación
+                            <span class="me-2 badge bg-label-primary">1</span> Comprender el problema
                         </button>
                     </h2>
                     <div id="polyaStep1-{{ mision.mision_id }}" class="accordion-collapse collapse show"
@@ -124,12 +130,12 @@
                                     <textarea class="form-control" rows="2" name="polya_por_que_operacion_{{ mision.mision_id }}" placeholder="Explica por qué elegiste esa operación" {% if user.rol.tipo == 'Profesor' %}disabled readonly{% endif %}></textarea>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label mb-1">Sumandos</label>
+                                <label class="form-label mb-1">Numeros de la operación</label>
                                     <small class="text-muted d-block mb-2">Agrega los números que intervienen en la operación (por ejemplo, 4 y 5 si es 4 + 5).</small>
                                     <div id="sumandos-container-{{ mision.mision_id }}"></div>
                                     {% if user.rol.tipo != 'Profesor' %}
                                     <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btn-add-sumando-{{ mision.mision_id }}">
-                                        <i class="ti ti-plus me-1"></i> Agregar sumando
+                                        <i class="ti ti-plus me-1"></i> Agregar número
                                     </button>
                                     {% endif %}
                                 </div>
@@ -142,7 +148,7 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep2-{{ mision.mision_id }}" aria-expanded="false"
                                 aria-controls="polyaStep2-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-info">2</span> Estrategia principal
+                            <span class="me-2 badge bg-label-info">2</span> Planificar la solución
                         </button>
                     </h2>
                     <div id="polyaStep2-{{ mision.mision_id }}" class="accordion-collapse collapse"
@@ -162,7 +168,7 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep3-{{ mision.mision_id }}" aria-expanded="false"
                                 aria-controls="polyaStep3-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-warning">3</span> Desarrollo y práctica de cálculo
+                            <span class="me-2 badge bg-label-warning">3</span> Ejecutar la operación
                         </button>
                     </h2>
                     <div id="polyaStep3-{{ mision.mision_id }}" class="accordion-collapse collapse"
@@ -185,8 +191,8 @@
                                         </div>
                                         <div class="col-sm-4">
                                             {% if user.rol.tipo != 'Profesor' %}
-                                            <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="btn-polya-calc-{{ mision.mision_id }}">
-                                                <i class="ti ti-equal me-1"></i> Calcular suma
+                                            <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="btn-polya-calc-{{ mision.mision_id }}" data-operacion="{{ mision.tipo_operacion }}">
+                                                <i class="ti ti-equal me-1"></i> Calcular resultado
                                             </button>
                                             {% endif %}
                                             <div class="small text-muted">Resultado: <span id="polya-calc-result-{{ mision.mision_id }}">—</span></div>
@@ -203,7 +209,7 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#polyaStep4-{{ mision.mision_id }}" aria-expanded="false"
                                 aria-controls="polyaStep4-{{ mision.mision_id }}">
-                            <span class="me-2 badge bg-label-success">4</span> Verificar y revisar
+                            <span class="me-2 badge bg-label-success">4</span> Verificar la respuesta
                         </button>
                     </h2>
                     <div id="polyaStep4-{{ mision.mision_id }}" class="accordion-collapse collapse"
@@ -266,6 +272,12 @@
   var mid = {{ mision.mision_id }};
   var obtenerUrl = "{% url 'misiones:obtener_polya_um' mision.mision_id %}";
   var guardarUrl = "{% url 'misiones:guardar_polya_um' mision.mision_id %}";
+  var esProfesor = {% if user.rol.tipo == 'Profesor' %}true{% else %}false{% endif %};
+  var bloqueada = {% if mision.bloqueada %}true{% else %}false{% endif %};
+  if (bloqueada && !esProfesor) {
+    // Evita inicializar listeners/requests cuando la misión está bloqueada para el estudiante
+    return;
+  }
   var btn = document.getElementById('btn-polya-save-' + mid);
   function getByName(base){ return document.querySelector('[name="' + base + '_' + mid + '"]'); }
   var q = getByName('polya_que_se_pide');
@@ -339,8 +351,29 @@
         calcResult.textContent = '—';
         return;
       }
-      var r = a + b;
-      calcResult.textContent = r;
+      var op = (identOp && identOp.value) ? (identOp.value || '').toLowerCase() : ((calcBtn.getAttribute('data-operacion') || 'suma').toLowerCase());
+      var r;
+      switch(op){
+        case 'suma':
+          r = a + b;
+          break;
+        case 'resta':
+          r = a - b;
+          break;
+        case 'multiplicacion':
+          r = a * b;
+          break;
+        case 'division':
+          if (b === 0){
+            calcResult.textContent = 'No permitido';
+            return;
+          }
+          r = a / b;
+          break;
+        default:
+          r = a + b;
+      }
+      calcResult.textContent = isNaN(r) ? '—' : r;
     });
   }
 

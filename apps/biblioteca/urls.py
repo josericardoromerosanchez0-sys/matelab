@@ -11,4 +11,6 @@ urlpatterns = [
     path('juego_operaciones/', views.juego_operaciones, name='juego_operaciones'),
     path('practica/', views.practica, name='practica'),
     path('marcar_contenido_visto/', views.marcar_contenido_visto, name='marcar_contenido_visto'),
+    path('polya/guardar/', views.guardar_polya_biblioteca, name='guardar_polya'),
+    path('polya/cargar/', views.cargar_polya_biblioteca, name='cargar_polya'),
 ]

@@ -65,7 +65,7 @@
             <tbody>
               {% for item in contenidos %}
               <tr>
-                <td>{{ item.id }}</td>
+                <td>{{ item.biblioteca_id }}</td>
                 <td>{{ item.titulo }}</td>
                 <td><span class="badge bg-label-info">{{ item.tipo }}</span></td>
                 <td>{{ item.descripcion|truncatechars:50 }}</td>
@@ -82,7 +82,7 @@
             class="btn btn-icon btn-outline-primary me-2" 
             data-bs-toggle="modal" 
             data-bs-target="#editContenidoModal" 
-            data-contenido-id="{{ item.id }}"
+            data-contenido-id="{{ item.biblioteca_id }}"
             data-titulo="{{ item.titulo }}"
             data-tipo="{{ item.tipo }}"
             data-descripcion="{{ item.descripcion|default_if_none:''|escape }}"
@@ -97,7 +97,7 @@
             class="btn btn-icon btn-outline-danger" 
             data-bs-toggle="modal" 
             data-bs-target="#deleteContenidoModal" 
-            data-contenido-id="{{ item.id }}"
+            data-contenido-id="{{ item.biblioteca_id }}"
             data-titulo="{{ item.titulo }}"
             title="Eliminar contenido">
             <i class="menu-icon icon-base ri ri-delete-bin-line"></i>
@@ -216,7 +216,7 @@
       </div>
       <form id="editContenidoForm" method="post" action="{% url 'editar_biblioteca' %}">
         {% csrf_token %}
-        <input type="hidden" name="id" id="edit_contenido_id"> 
+        <input type="hidden" name="biblioteca_id" id="edit_contenido_id"> 
         <div class="modal-body">
           <div class="mb-3">
             <label for="edit_titulo" class="form-label">Título</label>
@@ -287,7 +287,7 @@
       </div>
       <form id="deleteContenidoForm" method="post" action="{% url 'eliminar_biblioteca' %}">
         {% csrf_token %}
-        <input type="hidden" name="id" id="delete_contenido_id">
+        <input type="hidden" name="biblioteca_id" id="delete_contenido_id">
         <div class="modal-body">
           <p>¿Está seguro que desea eliminar el contenido <strong id="delete_contenido_titulo"></strong>?</p>
           <p class="text-danger">Esta acción no se puede deshacer.</p>

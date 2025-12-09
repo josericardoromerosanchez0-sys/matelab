@@ -138,7 +138,6 @@
       <tr> 
         <th>Misión</th>
         <th>Estado</th>
-        <th>Último Intento</th>
       </tr>
     </thead>
     <tbody>
@@ -146,12 +145,17 @@
       <tr> 
         <td>{{ intento.mision.titulo }}</td>
         <td>
-          <span class="badge bg-{{ intento.completada|yesno:'success,warning' }}">
-            {{ intento.completada|yesno:"Completada,En Progreso" }}
-          </span>
+          {% if intento.estado == 'completado' %}
+          <span class="badge bg-success">Completada</span>
+          {% elif intento.estado == 'rechazado' %}
+          <span class="badge bg-danger">Incorrecto</span>
+          {% elif intento.estado == 'en_progreso' %}
+          <span class="badge bg-warning">En Progreso</span>
+          {% else %}
+          <span class="badge bg-secondary">{{ intento.get_estado_display }}</span>
+          {% endif %}
         </td> 
-        <td>{{ intento.fecha_intento|timesince }}</td>
-  
+ 
       </tr>
       {% endfor %}
     </tbody>
@@ -257,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize DataTable
   $('#misionesTable').DataTable({
     responsive: true,
-    order: [[4, 'desc']],  // Sort by last attempt by default
+    order: [[0, 'asc']],  // Sort by mission name by default
     language: {
       search: "",
       searchPlaceholder: "Buscar misiones...",

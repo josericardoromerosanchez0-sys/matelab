@@ -61,3 +61,59 @@ class Biblioteca_Contenido(models.Model):
  
     def __str__(self):
         return self.Teoria
+
+
+class PolyaBiblioteca(models.Model):
+    id = models.AutoField(primary_key=True, db_column='polya_biblioteca_id')
+    usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE, db_column='usuario_id')
+    biblioteca = models.ForeignKey(Biblioteca, on_delete=models.CASCADE, db_column='biblioteca_id')
+
+    # Paso 1: Comprender el problema
+    identificacion_operacion = models.CharField(max_length=100, null=True, blank=True)
+    por_que_esa_operacion = models.CharField(max_length=300, null=True, blank=True)
+    que_se_pide = models.TextField(null=True, blank=True)
+    datos_conocidos = models.TextField(null=True, blank=True)
+    incognitas = models.TextField(null=True, blank=True)
+    representacion = models.CharField(max_length=500, null=True, blank=True)
+
+    # Paso 2: Planificar la estrategia
+    estrategia_principal = models.TextField(null=True, blank=True)
+
+    # Paso 3: Ejecutar el plan
+    desarrollo = models.TextField(null=True, blank=True)
+    resultados_intermedios = models.TextField(null=True, blank=True)
+
+    # Paso 4: Verificar y revisar
+    revision_verificacion = models.TextField(null=True, blank=True)
+    comprobacion_otro_metodo = models.TextField(null=True, blank=True)
+    conclusion_final = models.TextField(null=True, blank=True)
+    confianza = models.IntegerField(null=True, blank=True)
+
+    # Auditoría
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'Polya_Biblioteca'
+        managed = False
+        verbose_name = 'Trabajo Polya (Biblioteca)'
+        verbose_name_plural = 'Trabajos Polya (Biblioteca)'
+        unique_together = (('usuario', 'biblioteca'),)
+
+    def __str__(self):
+        return f"Polya Biblioteca - {self.usuario.nombre_usuario} / {self.biblioteca.titulo}"
+
+
+class Sumandos_Biblioteca(models.Model):
+    sumando_id = models.AutoField(primary_key=True)
+    polya_biblioteca = models.ForeignKey(PolyaBiblioteca, on_delete=models.CASCADE, db_column='polya_biblioteca_id')
+    sumando = models.TextField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'Sumandos_Biblioteca'
+        managed = False
+        verbose_name = 'Sumando (Biblioteca)'
+        verbose_name_plural = 'Sumandos (Biblioteca)'
+
+    def __str__(self):
+        return f"Sumando {self.sumando_id} - Biblioteca"
